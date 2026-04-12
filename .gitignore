@@ -5,5 +5,8 @@ dist/
 *.db-wal
 *.db-shm
 output.json
+demo-output.json
 .env
 .DS_Store
+.omc/
+.claude/

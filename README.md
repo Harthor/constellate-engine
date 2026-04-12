@@ -125,4 +125,10 @@ npm run test:watch   # Watch mode
 
 ## License
 
-BUSL-1.1
+This project is source-available under the Business Source License 1.1 (BSL 1.1).
+
+- **Change Date**: April 12, 2030
+- **Change License**: Apache License 2.0
+- **Additional Use Grant**: You may use the Licensed Work for any purpose other than operating a commercial hosted service that competes with constellate.fyi.
+
+After the Change Date, the code becomes available under Apache 2.0. See the `LICENSE` file for the full text.
