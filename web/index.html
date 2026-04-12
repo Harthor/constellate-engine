@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellate — Pattern Visualizer</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108, 99, 255, 0.3);
+      --triangulation: #ff6b6b;
+      --spectrum: #ffd93d;
+      --chain: #6bcb77;
+      --convergence: #4d96ff;
+      --absence: #c084fc;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    header h1 span { color: var(--accent); }
+
+    .meta {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .meta strong { color: var(--text); }
+
+    .controls {
+      padding: 1rem 2rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .controls button {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+
+    .controls button:hover { border-color: var(--accent); }
+    .controls button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 1rem;
+    }
+
+    .upload-zone p { color: var(--text-dim); font-size: 0.95rem; }
+
+    .upload-zone label {
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.15s;
+    }
+
+    .upload-zone label:hover { opacity: 0.85; }
+    .upload-zone input { display: none; }
+
+    main {
+      display: none;
+      padding: 1.5rem 2rem;
+    }
+
+    main.visible { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge.triangulation { background: var(--triangulation); color: #000; }
+    .badge.spectrum { background: var(--spectrum); color: #000; }
+    .badge.chain { background: var(--chain); color: #000; }
+    .badge.convergence { background: var(--convergence); color: #000; }
+    .badge.absence { background: var(--absence); color: #000; }
+
+    .score {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .score strong { color: var(--accent); font-size: 0.95rem; }
+
+    .explanation {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin-bottom: 0.8rem;
+    }
+
+    .ideas-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .idea-chip {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(108, 99, 255, 0.1);
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      color: var(--text);
+    }
+
+    /* Patterns section */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pattern-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .pattern-card .card-title { color: var(--accent); }
+
+    .pattern-card .explanation {
+      margin-bottom: 0;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 2rem;
+      padding: 1rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+
+    .stat-item { display: flex; flex-direction: column; gap: 0.15rem; }
+    .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+    .stat-label { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>*</span> Constellate</h1>
+  <div class="meta" id="header-meta"></div>
+</header>
+
+<div class="upload-zone" id="upload-zone">
+  <p>Load a pipeline output JSON to visualize results</p>
+  <label for="file-input">Choose output.json</label>
+  <input type="file" id="file-input" accept=".json">
+  <p style="font-size: 0.8rem; color: var(--text-dim);">
+    or drag & drop anywhere on this page
+  </p>
+</div>
+
+<div class="stats-bar" id="stats-bar" style="display: none;"></div>
+
+<div class="controls" id="controls" style="display: none;">
+  <button class="active" data-filter="all">All</button>
+  <button data-filter="triangulation">Triangulation</button>
+  <button data-filter="spectrum">Spectrum</button>
+  <button data-filter="chain">Chain</button>
+  <button data-filter="convergence">Convergence</button>
+  <button data-filter="absence">Absence</button>
+</div>
+
+<main id="main">
+  <div class="grid" id="constellations-grid"></div>
+  <h2 class="section-title" id="patterns-title" style="display: none;">Emergent Patterns</h2>
+  <div id="patterns-list"></div>
+</main>
+
+<script>
+  let data = null;
+  let currentFilter = 'all';
+
+  // File input
+  document.getElementById('file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) loadFile(file);
+  });
+
+  // Drag & drop
+  document.addEventListener('dragover', (e) => e.preventDefault());
+  document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) loadFile(file);
+  });
+
+  // Filter buttons
+  document.getElementById('controls').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    currentFilter = e.target.dataset.filter;
+    document.querySelectorAll('.controls button').forEach((b) => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderConstellations();
+  });
+
+  function loadFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        data = JSON.parse(e.target.result);
+        renderAll();
+      } catch (err) {
+        alert('Invalid JSON file');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function renderAll() {
+    document.getElementById('upload-zone').style.display = 'none';
+    document.getElementById('stats-bar').style.display = 'flex';
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('main').classList.add('visible');
+
+    // Stats
+    const m = data.metadata;
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-item"><span class="stat-value">${m.total_ideas}</span><span class="stat-label">Ideas</span></div>
+      <div class="stat-item"><span class="stat-value">${m.neighborhoods_total}</span><span class="stat-label">Neighborhoods</span></div>
+      <div class="stat-item"><span class="stat-value">${m.constellations_found}</span><span class="stat-label">Constellations</span></div>
+      <div class="stat-item"><span class="stat-value">${data.patterns.length}</span><span class="stat-label">Patterns</span></div>
+      <div class="stat-item"><span class="stat-value">$${m.estimated_cost_usd.toFixed(4)}</span><span class="stat-label">Cost</span></div>
+      <div class="stat-item"><span class="stat-value">${(m.elapsed_ms / 1000).toFixed(1)}s</span><span class="stat-label">Time</span></div>
+    `;
+
+    // Header meta
+    document.getElementById('header-meta').innerHTML = `
+      <span>Cache: <strong>${m.constellation_cache_hits}</strong> hits, <strong>${m.constellation_api_calls}</strong> API calls</span>
+    `;
+
+    renderConstellations();
+    renderPatterns();
+  }
+
+  function renderConstellations() {
+    const grid = document.getElementById('constellations-grid');
+    const sorted = [...data.constellations].sort((a, b) => b.score - a.score);
+    const filtered = currentFilter === 'all'
+      ? sorted
+      : sorted.filter((c) => c.constellation_type === currentFilter);
+
+    grid.innerHTML = filtered.map((c) => `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${esc(c.title)}</div>
+          <span class="badge ${c.constellation_type}">${c.constellation_type}</span>
+        </div>
+        <div class="score">Score: <strong>${c.score}</strong>/10</div>
+        <div class="explanation">${esc(c.explanation)}</div>
+        <div class="ideas-list">
+          ${c.idea_ids.map((id) => {
+            const idea = data.ideas[id];
+            return `<span class="idea-chip" title="${esc(idea?.description || '')}">${esc(idea?.title || 'ID:' + id)}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderPatterns() {
+    const list = document.getElementById('patterns-list');
+    const title = document.getElementById('patterns-title');
+
+    if (data.patterns.length === 0) {
+      title.style.display = 'none';
+      list.innerHTML = '';
+      return;
+    }
+
+    title.style.display = 'block';
+    list.innerHTML = data.patterns.map((p) => `
+      <div class="pattern-card">
+        <div class="card-title">${esc(p.pattern_title)}</div>
+        <div class="explanation" style="margin-top: 0.5rem;">${esc(p.pattern_description)}</div>
+      </div>
+    `).join('');
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>

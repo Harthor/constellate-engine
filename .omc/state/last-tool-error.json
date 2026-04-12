@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"npx vitest run 2>&1\",\"timeout\":30000,\"description\":\"Run all tests\"}",
+  "error": "Exit code 1\n\n RUN  v3.2.4 /home/gaston/Documents/constellate-engine\n\n ❯ tests/tfidf.test.ts (6 tests | 1 failed) 8ms\n   ✓ TfIdfEmbedder > has model name 1ms\n   ✓ TfIdfEmbedder > returns vectors with correct count 1ms\n   ✓ TfIdfEmbedder > vectors are L2-normalized 0ms\n   × TfIdfEmbedder > similar documents produce closer vectors 4ms\n     → expected 0 to be greater than 0\n   ✓ TfIdfEmbedder > handles single document 0ms\n   ✓ TfIdfEmbedder > dimensions match vector length 0ms\n ✓ tests/database.test...",
+  "timestamp": "2026-04-12T17:09:28.363Z",
+  "retry_count": 1
+}

@@ -1,0 +1,242 @@
+[
+  {
+    "title": "Local-first CRDT database for mobile apps",
+    "description": "A database engine that uses CRDTs for conflict-free replication between devices, enabling fully offline-capable mobile applications without a central server.",
+    "source": "github-trending",
+    "url": "https://example.com/crdt-db",
+    "category": "databases",
+    "stack": "rust,sqlite"
+  },
+  {
+    "title": "AI-powered code review bot",
+    "description": "A GitHub bot that uses LLMs to review pull requests, suggest improvements, and detect potential bugs before human review. Integrates with existing CI/CD pipelines.",
+    "source": "github-trending",
+    "url": "https://example.com/ai-code-review",
+    "category": "devtools",
+    "stack": "typescript,openai"
+  },
+  {
+    "title": "WebAssembly runtime for edge computing",
+    "description": "A lightweight WASM runtime designed for edge nodes, enabling serverless functions with sub-millisecond cold starts and strong sandboxing guarantees.",
+    "source": "github-trending",
+    "url": "https://example.com/wasm-edge",
+    "category": "infrastructure",
+    "stack": "rust,wasm"
+  },
+  {
+    "title": "Peer-to-peer video conferencing without servers",
+    "description": "End-to-end encrypted video calls using WebRTC with a mesh topology. No central server needed — participants connect directly to each other.",
+    "source": "hackernews",
+    "url": "https://example.com/p2p-video",
+    "category": "communication",
+    "stack": "typescript,webrtc"
+  },
+  {
+    "title": "Personal knowledge graph from browser history",
+    "description": "Automatically builds a knowledge graph from your browsing history, extracting entities and relationships to help you rediscover forgotten connections between topics.",
+    "source": "hackernews",
+    "url": "https://example.com/browser-kg",
+    "category": "productivity",
+    "stack": "python,neo4j"
+  },
+  {
+    "title": "Tiny ML framework for microcontrollers",
+    "description": "Run neural network inference on Arduino and ESP32 boards. Supports quantized models under 100KB with automatic model compression from PyTorch.",
+    "source": "github-trending",
+    "url": "https://example.com/tiny-ml",
+    "category": "ml",
+    "stack": "c++,python"
+  },
+  {
+    "title": "Open-source Figma alternative with real-time collaboration",
+    "description": "A self-hostable design tool with real-time multiplayer editing, vector graphics, and component libraries. Uses CRDTs for conflict resolution.",
+    "source": "github-trending",
+    "url": "https://example.com/open-figma",
+    "category": "design",
+    "stack": "typescript,canvas,crdt"
+  },
+  {
+    "title": "Automated database migration testing",
+    "description": "Tool that spins up temporary database instances, applies migrations, seeds data, and runs integration tests to catch migration issues before production deployment.",
+    "source": "hackernews",
+    "url": "https://example.com/migration-test",
+    "category": "devtools",
+    "stack": "go,postgres"
+  },
+  {
+    "title": "Privacy-preserving analytics with differential privacy",
+    "description": "A drop-in replacement for Google Analytics that adds calibrated noise to metrics using differential privacy, making it mathematically impossible to identify individuals.",
+    "source": "hackernews",
+    "url": "https://example.com/dp-analytics",
+    "category": "privacy",
+    "stack": "rust,typescript"
+  },
+  {
+    "title": "Declarative infrastructure for AI training clusters",
+    "description": "Define GPU clusters, networking, and storage for ML training jobs in YAML. Handles spot instance management, checkpointing, and automatic failover.",
+    "source": "github-trending",
+    "url": "https://example.com/ai-infra",
+    "category": "infrastructure",
+    "stack": "python,kubernetes"
+  },
+  {
+    "title": "Git-based CMS for static sites",
+    "description": "Content management system that stores everything in git. Editors use a web UI that commits directly to the repo, triggering static site rebuilds automatically.",
+    "source": "github-trending",
+    "url": "https://example.com/git-cms",
+    "category": "cms",
+    "stack": "typescript,git"
+  },
+  {
+    "title": "Rust rewrite of core Unix utilities",
+    "description": "Modern implementations of ls, cat, grep, find and other Unix tools in Rust. Faster performance, better error messages, and sane defaults while maintaining compatibility.",
+    "source": "github-trending",
+    "url": "https://example.com/rust-coreutils",
+    "category": "cli",
+    "stack": "rust"
+  },
+  {
+    "title": "Decentralized identity verification",
+    "description": "A protocol for verifiable credentials using DIDs (Decentralized Identifiers). Users control their own identity data without relying on centralized providers.",
+    "source": "hackernews",
+    "url": "https://example.com/did-verify",
+    "category": "identity",
+    "stack": "typescript,blockchain"
+  },
+  {
+    "title": "Browser extension for real-time language translation",
+    "description": "Translates web pages in real-time using a local LLM running in WebGPU. No data sent to servers — all processing happens in the browser.",
+    "source": "hackernews",
+    "url": "https://example.com/local-translate",
+    "category": "ai",
+    "stack": "typescript,webgpu,onnx"
+  },
+  {
+    "title": "Semantic search engine for internal documentation",
+    "description": "Index Confluence, Notion, Google Docs and Slack into a unified semantic search. Uses embeddings to find relevant docs even when exact keywords don't match.",
+    "source": "github-trending",
+    "url": "https://example.com/doc-search",
+    "category": "search",
+    "stack": "python,pinecone"
+  },
+  {
+    "title": "Low-code workflow automation for non-technical teams",
+    "description": "Visual builder for business automations connecting SaaS tools. Includes conditional logic, error handling, and approval workflows without writing code.",
+    "source": "producthunt",
+    "url": "https://example.com/low-code-auto",
+    "category": "automation",
+    "stack": "typescript,react"
+  },
+  {
+    "title": "Collaborative Jupyter notebook alternative",
+    "description": "A notebook environment with real-time collaboration, built-in version control, and reactive cells that automatically re-execute when dependencies change.",
+    "source": "github-trending",
+    "url": "https://example.com/collab-notebook",
+    "category": "datascience",
+    "stack": "python,typescript"
+  },
+  {
+    "title": "Supply chain attack detection for npm packages",
+    "description": "Static and dynamic analysis of npm packages to detect supply chain attacks: typosquatting, malicious postinstall scripts, and compromised maintainer accounts.",
+    "source": "hackernews",
+    "url": "https://example.com/npm-guard",
+    "category": "security",
+    "stack": "typescript,node"
+  },
+  {
+    "title": "Mesh VPN for connecting home lab devices",
+    "description": "WireGuard-based mesh network that connects devices across NATs and firewalls. Auto-discovers peers and establishes direct connections when possible.",
+    "source": "github-trending",
+    "url": "https://example.com/mesh-vpn",
+    "category": "networking",
+    "stack": "go,wireguard"
+  },
+  {
+    "title": "AI agent framework for autonomous coding",
+    "description": "A framework for building AI agents that can read codebases, plan changes, write code, run tests, and iterate. Supports multiple LLM backends and tool integrations.",
+    "source": "github-trending",
+    "url": "https://example.com/ai-agent-code",
+    "category": "ai",
+    "stack": "python,anthropic"
+  },
+  {
+    "title": "Incremental static regeneration for any framework",
+    "description": "Library that adds ISR capabilities to any web framework. Pages are statically generated but can be individually revalidated without full rebuilds.",
+    "source": "hackernews",
+    "url": "https://example.com/isr-lib",
+    "category": "web",
+    "stack": "typescript"
+  },
+  {
+    "title": "Open-source observability platform",
+    "description": "Unified logs, metrics, and traces platform that's self-hostable. Compatible with OpenTelemetry, Prometheus, and Grafana. Uses ClickHouse for storage.",
+    "source": "github-trending",
+    "url": "https://example.com/obs-platform",
+    "category": "observability",
+    "stack": "go,clickhouse"
+  },
+  {
+    "title": "Voice-controlled home automation hub",
+    "description": "Local-only voice assistant that controls smart home devices. All speech recognition runs on-device — no cloud dependency. Supports custom wake words and routines.",
+    "source": "hackernews",
+    "url": "https://example.com/voice-home",
+    "category": "iot",
+    "stack": "python,whisper"
+  },
+  {
+    "title": "Type-safe API layer generator from database schema",
+    "description": "Introspects your PostgreSQL schema and generates a fully typed REST and GraphQL API with validation, pagination, and access control. Zero boilerplate.",
+    "source": "github-trending",
+    "url": "https://example.com/schema-api",
+    "category": "devtools",
+    "stack": "typescript,postgres"
+  },
+  {
+    "title": "Decentralized file storage with erasure coding",
+    "description": "Store files across a peer-to-peer network with redundancy via erasure coding. Files survive even if 30% of nodes go offline. Pay storage providers with crypto.",
+    "source": "hackernews",
+    "url": "https://example.com/decentral-storage",
+    "category": "storage",
+    "stack": "rust,libp2p"
+  },
+  {
+    "title": "Interactive SQL learning platform",
+    "description": "Browser-based SQL playground with progressive challenges. Each exercise runs against a real database with instant feedback and visual query execution plans.",
+    "source": "producthunt",
+    "url": "https://example.com/sql-learn",
+    "category": "education",
+    "stack": "typescript,postgres,react"
+  },
+  {
+    "title": "Automated accessibility testing for web apps",
+    "description": "CI/CD integration that crawls your web app and reports WCAG violations. Includes visual regression testing for color contrast and font size requirements.",
+    "source": "github-trending",
+    "url": "https://example.com/a11y-test",
+    "category": "testing",
+    "stack": "typescript,playwright"
+  },
+  {
+    "title": "Feature flag service with gradual rollouts",
+    "description": "Self-hosted feature flag platform supporting percentage rollouts, A/B testing, and targeting rules. SDKs for all major languages with sub-millisecond evaluation.",
+    "source": "github-trending",
+    "url": "https://example.com/feature-flags",
+    "category": "devtools",
+    "stack": "go,redis"
+  },
+  {
+    "title": "End-to-end encrypted note-taking app",
+    "description": "Markdown notes with E2EE. Sync across devices via encrypted blobs in S3. Supports backlinks, graph view, and full-text search — all client-side.",
+    "source": "hackernews",
+    "url": "https://example.com/e2e-notes",
+    "category": "productivity",
+    "stack": "typescript,react"
+  },
+  {
+    "title": "Container-native CI/CD with caching layers",
+    "description": "A CI system where every step runs in a container with content-addressed caching. Unchanged steps are skipped entirely, making builds 10x faster on average.",
+    "source": "github-trending",
+    "url": "https://example.com/fast-ci",
+    "category": "devops",
+    "stack": "go,docker"
+  }
+]

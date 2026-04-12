@@ -1,0 +1,108 @@
+{
+  "constellations": [
+    {
+      "neighborhood_hash": "abc123",
+      "constellation_type": "convergence",
+      "idea_ids": [1, 7, 17],
+      "title": "CRDTs Are Eating Everything",
+      "explanation": "Three unrelated projects — a mobile database, a design tool, and a notebook — independently chose CRDTs as their sync primitive. This isn't coincidence: it signals that real-time collaboration is becoming a baseline expectation, and CRDTs are winning the architectural debate over OT.",
+      "score": 9,
+      "model": "claude-sonnet-4-5-20250929",
+      "prompt_version": "constellation_v1"
+    },
+    {
+      "neighborhood_hash": "def456",
+      "constellation_type": "triangulation",
+      "idea_ids": [9, 13, 25],
+      "title": "The Privacy-By-Architecture Movement",
+      "explanation": "Differential privacy analytics, decentralized identity, and decentralized storage each solve privacy from a different angle — statistical, identity, and data sovereignty. Together they sketch a world where privacy isn't a feature toggle but a structural guarantee baked into the system architecture.",
+      "score": 8,
+      "model": "claude-sonnet-4-5-20250929",
+      "prompt_version": "constellation_v1"
+    },
+    {
+      "neighborhood_hash": "ghi789",
+      "constellation_type": "chain",
+      "idea_ids": [2, 20, 18],
+      "title": "From Review to Agent to Guardian",
+      "explanation": "Code review bots lead to autonomous coding agents, which create the need for supply chain attack detection. This is an evolutionary chain: as AI writes more code, the attack surface grows, demanding AI-powered security to close the loop.",
+      "score": 8,
+      "model": "claude-sonnet-4-5-20250929",
+      "prompt_version": "constellation_v1"
+    },
+    {
+      "neighborhood_hash": "jkl012",
+      "constellation_type": "spectrum",
+      "idea_ids": [3, 6, 14, 23],
+      "title": "The Compute Location Spectrum",
+      "explanation": "Edge WASM runtime, microcontroller ML, browser-local translation, and voice-on-device form a spectrum of where compute happens — from cloud to edge to browser to chip. The axis reveals a strong pull toward pushing intelligence to the smallest possible device.",
+      "score": 7,
+      "model": "claude-sonnet-4-5-20250929",
+      "prompt_version": "constellation_v1"
+    },
+    {
+      "neighborhood_hash": "mno345",
+      "constellation_type": "absence",
+      "idea_ids": [5, 15, 26],
+      "title": "Missing: The Personal API Layer",
+      "explanation": "A knowledge graph from browsing, semantic doc search, and an SQL learning platform all deal with making information accessible. What's conspicuously absent is a personal API that unifies all your scattered data — browsing, notes, bookmarks, conversations — into one queryable interface.",
+      "score": 7,
+      "model": "claude-sonnet-4-5-20250929",
+      "prompt_version": "constellation_v1"
+    }
+  ],
+  "patterns": [
+    {
+      "cluster_hash": "pat001",
+      "pattern_title": "The Local-First Renaissance",
+      "pattern_description": "Multiple projects assume that cloud dependency is a bug, not a feature. From CRDTs to on-device ML to local-only voice assistants, there's a quiet paradigm shift: the default is moving from 'cloud with offline fallback' to 'local with optional sync'.",
+      "idea_ids": [1, 6, 14, 23, 29],
+      "model": "claude-opus-4-5-20251101",
+      "prompt_version": "patterns_v1"
+    },
+    {
+      "cluster_hash": "pat002",
+      "pattern_title": "Developer Tools Are Becoming AI Consumers",
+      "pattern_description": "Code review, testing, accessibility auditing, and even CI/CD are all converging on LLM integration. The implicit assumption is that every developer tool will eventually have an AI copilot layer — the question isn't if but when.",
+      "idea_ids": [2, 8, 20, 27, 30],
+      "model": "claude-opus-4-5-20251101",
+      "prompt_version": "patterns_v1"
+    }
+  ],
+  "ideas": {
+    "1": { "title": "Local-first CRDT database for mobile apps", "source": "github-trending", "category": "databases", "description": "A database engine using CRDTs for conflict-free replication between devices." },
+    "2": { "title": "AI-powered code review bot", "source": "github-trending", "category": "devtools", "description": "A GitHub bot that uses LLMs to review pull requests." },
+    "3": { "title": "WebAssembly runtime for edge computing", "source": "github-trending", "category": "infrastructure", "description": "Lightweight WASM runtime for edge nodes." },
+    "5": { "title": "Personal knowledge graph from browser history", "source": "hackernews", "category": "productivity", "description": "Builds a knowledge graph from browsing history." },
+    "6": { "title": "Tiny ML framework for microcontrollers", "source": "github-trending", "category": "ml", "description": "Neural network inference on Arduino and ESP32." },
+    "7": { "title": "Open-source Figma alternative", "source": "github-trending", "category": "design", "description": "Self-hostable design tool with real-time collaboration." },
+    "8": { "title": "Automated database migration testing", "source": "hackernews", "category": "devtools", "description": "Spins up temporary DB instances and tests migrations." },
+    "9": { "title": "Privacy-preserving analytics", "source": "hackernews", "category": "privacy", "description": "Analytics with differential privacy." },
+    "13": { "title": "Decentralized identity verification", "source": "hackernews", "category": "identity", "description": "Verifiable credentials using DIDs." },
+    "14": { "title": "Browser extension for local translation", "source": "hackernews", "category": "ai", "description": "Real-time translation using local LLM in WebGPU." },
+    "15": { "title": "Semantic search for internal docs", "source": "github-trending", "category": "search", "description": "Unified semantic search across Confluence, Notion, Slack." },
+    "17": { "title": "Collaborative Jupyter alternative", "source": "github-trending", "category": "datascience", "description": "Notebook with real-time collaboration and reactive cells." },
+    "18": { "title": "Supply chain attack detection for npm", "source": "hackernews", "category": "security", "description": "Detects typosquatting and malicious npm packages." },
+    "20": { "title": "AI agent framework for coding", "source": "github-trending", "category": "ai", "description": "Framework for autonomous coding agents." },
+    "23": { "title": "Voice-controlled home automation", "source": "hackernews", "category": "iot", "description": "Local-only voice assistant for smart home." },
+    "25": { "title": "Decentralized file storage", "source": "hackernews", "category": "storage", "description": "P2P file storage with erasure coding." },
+    "26": { "title": "Interactive SQL learning platform", "source": "producthunt", "category": "education", "description": "Browser-based SQL playground with challenges." },
+    "27": { "title": "Automated accessibility testing", "source": "github-trending", "category": "testing", "description": "CI/CD integration for WCAG compliance." },
+    "29": { "title": "E2E encrypted note-taking", "source": "hackernews", "category": "productivity", "description": "Markdown notes with end-to-end encryption." },
+    "30": { "title": "Container-native CI/CD", "source": "github-trending", "category": "devops", "description": "CI with content-addressed caching layers." }
+  },
+  "metadata": {
+    "total_ideas": 30,
+    "neighborhoods_intra": 8,
+    "neighborhoods_cross": 10,
+    "neighborhoods_total": 18,
+    "constellations_found": 5,
+    "constellations_by_type": { "convergence": 1, "triangulation": 1, "chain": 1, "spectrum": 1, "absence": 1 },
+    "constellation_cache_hits": 2,
+    "constellation_api_calls": 16,
+    "pattern_cache_hits": 0,
+    "pattern_api_calls": 8,
+    "estimated_cost_usd": 0.4231,
+    "elapsed_ms": 42150
+  }
+}
