@@ -156,48 +156,8 @@ export async function scrapeYCombinator(): Promise<RawIdea[]> {
 }
 
 // ─── Indie Hackers ─────────────────────────────────────────────────
-
-export async function scrapeIndieHackers(): Promise<RawIdea[]> {
-  try {
-    const res = await fetch('https://www.indiehackers.com/api/products?sort=revenue&limit=20', {
-      headers: { 'User-Agent': UA },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as any;
-      const products = data?.products ?? data ?? [];
-      if (Array.isArray(products) && products.length > 0) {
-        return products.slice(0, 20).map((p: any) => ({
-          title: p.name || p.id,
-          url: `https://www.indiehackers.com/product/${p.id || p.slug}`,
-          description: p.description || p.tagline || '',
-          source: 'indiehackers',
-        }));
-      }
-    }
-  } catch { /* fall through to HTML scraping */ }
-
-  const html = await (
-    await fetch('https://www.indiehackers.com/products', { headers: { 'User-Agent': UA } })
-  ).text();
-  const items: RawIdea[] = [];
-  const nameRe = /"name":"([^"]+)"/g;
-  const slugRe = /"slug":"([^"]+)"/g;
-  const descRe = /"tagline":"([^"]+)"/g;
-  const names: string[] = [], slugs: string[] = [], descs: string[] = [];
-  let m;
-  while ((m = nameRe.exec(html)) !== null) names.push(m[1]);
-  while ((m = slugRe.exec(html)) !== null) slugs.push(m[1]);
-  while ((m = descRe.exec(html)) !== null) descs.push(m[1]);
-  for (let i = 0; i < Math.min(names.length, 20); i++) {
-    items.push({
-      title: names[i],
-      url: `https://www.indiehackers.com/product/${slugs[i] || ''}`,
-      description: descs[i] || '',
-      source: 'indiehackers',
-    });
-  }
-  return items;
-}
+// Not included in the open-source release — Indie Hackers has no public API.
+// See docs/custom-sources.md for implementation guidance.
 
 // ─── BetaList ──────────────────────────────────────────────────────
 
@@ -245,30 +205,9 @@ export async function scrapeDevTo(): Promise<RawIdea[]> {
 }
 
 // ─── Reddit ────────────────────────────────────────────────────────
-
-export async function scrapeReddit(): Promise<RawIdea[]> {
-  const items: RawIdea[] = [];
-  for (const sub of ['SaaS', 'startups']) {
-    try {
-      const res = await fetch(`https://www.reddit.com/r/${sub}/top.json?t=week&limit=15`, {
-        headers: { 'User-Agent': UA, Accept: 'application/json' },
-      });
-      const data = (await res.json()) as any;
-      for (const post of data?.data?.children ?? []) {
-        const p = post.data;
-        if (!p.title) continue;
-        const url = p.is_self
-          ? `https://www.reddit.com${p.permalink}`
-          : p.url || `https://www.reddit.com${p.permalink}`;
-        const desc = p.is_self
-          ? `${p.selftext?.slice(0, 200) || ''} | r/${sub} | score: ${p.score} | comments: ${p.num_comments}`
-          : `r/${sub} | score: ${p.score} | comments: ${p.num_comments}`;
-        items.push({ title: p.title, url, description: desc, source: 'reddit' });
-      }
-    } catch { continue; }
-  }
-  return items.slice(0, 25);
-}
+// Not included in the open-source release due to Reddit ToS constraints.
+// Reddit requires OAuth2 via their official API since June 2023.
+// See docs/custom-sources.md for implementation guidance.
 
 // ─── Papers With Code ──────────────────────────────────────────────
 
@@ -355,10 +294,8 @@ export const SCRAPERS: Record<string, () => Promise<RawIdea[]>> = {
   arxiv: scrapeArxiv,
   producthunt: scrapeProductHunt,
   yc: scrapeYCombinator,
-  indiehackers: scrapeIndieHackers,
   betalist: scrapeBetaList,
   devto: scrapeDevTo,
-  reddit: scrapeReddit,
   paperswithcode: scrapePapersWithCode,
   huggingface: scrapeHuggingFace,
 };

@@ -118,9 +118,11 @@ class MyEmbedder implements Embedder {
 
 ## Sources
 
-Constellate scrapes 11 sources out of the box:
+Constellate ships with 9 built-in scrapers:
 
-GitHub Trending, Hacker News, arXiv (CS.AI), Product Hunt, Y Combinator, Indie Hackers, BetaList, Dev.to, Reddit (r/SaaS + r/startups), Papers With Code, Hugging Face.
+GitHub Trending, Hacker News, arXiv (CS.AI), Product Hunt, Y Combinator, BetaList, Dev.to, Papers With Code, Hugging Face.
+
+Reddit and Indie Hackers are **not included** in the open-source release due to ToS constraints. See [docs/custom-sources.md](docs/custom-sources.md) for guidance on adding your own sources, including Reddit with OAuth2.
 
 ```bash
 # Scrape all sources
