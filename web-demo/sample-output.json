@@ -9,7 +9,7 @@
         57
       ],
       "title": "AI Colonizing High-Stakes Financial Operations",
-      "explanation": "Three AI systems targeting different financial domains—trading, insurance brokerage, and energy grid storage—reveal a pattern of automation moving into sectors where decisions involve significant capital and regulatory complexity. None are consumer-facing; all operate in B2B contexts where mistakes are measured in millions. This convergence suggests AI is migrating from low-stakes automation to high-consequence financial orchestration, raising questions about systemic risk concentration.",
+      "explanation": "Three AI systems targeting different financial domains\u2014trading, insurance brokerage, and energy grid storage\u2014reveal a pattern of automation moving into sectors where decisions involve significant capital and regulatory complexity. None are consumer-facing; all operate in B2B contexts where mistakes are measured in millions. This convergence suggests AI is migrating from low-stakes automation to high-consequence financial orchestration, raising questions about systemic risk concentration.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -26,7 +26,7 @@
         78
       ],
       "title": "Missing: Production Software Amid Meta-Content",
-      "explanation": "Six ideas cluster around DEV community meta-content: featured posts, platform mechanics, and April Fools submissions that are deliberately satirical or self-referential. What's conspicuously absent is any serious production software, frameworks, or engineering solutions. The gap reveals a community moment focused on platform engagement and humor rather than technical substance—missing are actual tools, libraries, or architectural patterns that developers would deploy.",
+      "explanation": "Six ideas cluster around DEV community meta-content: featured posts, platform mechanics, and April Fools submissions that are deliberately satirical or self-referential. What's conspicuously absent is any serious production software, frameworks, or engineering solutions. The gap reveals a community moment focused on platform engagement and humor rather than technical substance\u2014missing are actual tools, libraries, or architectural patterns that developers would deploy.",
       "score": 6,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -54,7 +54,7 @@
         6
       ],
       "title": "From Benchmarking to Operational Transparency",
-      "explanation": "A logical progression in AI tooling maturity: the leaderboard establishes model capability baselines, the chat platform provides universal LLM access layer, and the HUD plugin solves the emerging problem of runtime observability. Each layer assumes the previous exists—you need models to evaluate, platforms to deploy them, and visibility into their actual execution. This reveals how AI infrastructure evolves from selection to deployment to operational monitoring.",
+      "explanation": "A logical progression in AI tooling maturity: the leaderboard establishes model capability baselines, the chat platform provides universal LLM access layer, and the HUD plugin solves the emerging problem of runtime observability. Each layer assumes the previous exists\u2014you need models to evaluate, platforms to deploy them, and visibility into their actual execution. This reveals how AI infrastructure evolves from selection to deployment to operational monitoring.",
       "score": 6,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -69,7 +69,7 @@
         6
       ],
       "title": "Missing: Cross-Agent Memory and Learning Layer",
-      "explanation": "Four ideas reveal sophisticated agent architectures with tools, skills, subagents, and observability—but none addresses how agents retain and transfer learning across sessions or tasks. Deer-flow mentions \"memories\" but the neighborhood lacks any focus on persistent learning, experience replay, or knowledge accumulation. The gap is a meta-learning layer that allows agents to improve from their own execution history, not just execute with static capabilities.",
+      "explanation": "Four ideas reveal sophisticated agent architectures with tools, skills, subagents, and observability\u2014but none addresses how agents retain and transfer learning across sessions or tasks. Deer-flow mentions \"memories\" but the neighborhood lacks any focus on persistent learning, experience replay, or knowledge accumulation. The gap is a meta-learning layer that allows agents to improve from their own execution history, not just execute with static capabilities.",
       "score": 8,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -83,37 +83,8 @@
         61
       ],
       "title": "Democratization Through Local Control",
-      "explanation": "These ideas converge on eliminating gatekeepers through localization: OpenScreen removes paid demo software, Google's gallery enables local model execution bypassing cloud dependencies, and Doublezero creates a marketplace for autonomous agents outside centralized platforms. Each addresses platform lock-in from different angles—creation tools, inference infrastructure, and agent deployment. The structural solution is identical: shift power from centralized services to individual users through open-source or decentralized alternatives.",
+      "explanation": "These ideas converge on eliminating gatekeepers through localization: OpenScreen removes paid demo software, Google's gallery enables local model execution bypassing cloud dependencies, and Doublezero creates a marketplace for autonomous agents outside centralized platforms. Each addresses platform lock-in from different angles\u2014creation tools, inference infrastructure, and agent deployment. The structural solution is identical: shift power from centralized services to individual users through open-source or decentralized alternatives.",
       "score": 7,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "e3f69563b86d8690f538f9283635e7ae1eeda4b7e611c4c1ef26b88a7a14b4af",
-      "constellation_type": "triangulation",
-      "idea_ids": [
-        54,
-        61,
-        86
-      ],
-      "title": "AI Competence Cannot Be Faked Anymore",
-      "explanation": "Outship evaluates engineers by observing AI tool usage, Doublezero enables monetization of autonomous agents, while the SLOP critique reveals AI-generated garbage from incompetent usage. Together they illuminate a bifurcation: AI amplifies both competence and incompetence, making the delta between skilled and unskilled users massive. The emerging insight is that AI literacy becomes the new fundamental skill divide, not AI access itself.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "e3f69563b86d8690f538f9283635e7ae1eeda4b7e611c4c1ef26b88a7a14b4af",
-      "constellation_type": "absence",
-      "idea_ids": [
-        5,
-        12,
-        61,
-        86
-      ],
-      "title": "Missing: Quality Verification Layer",
-      "explanation": "We have free creation tools (OpenScreen), local execution capabilities (gallery), autonomous agent platforms (Doublezero), and widespread recognition of AI slop proliferation. What's conspicuously absent is a credible quality verification or provenance system that distinguishes human-crafted, AI-assisted, or AI-generated content. The neighborhood shows both democratization of creation and degradation of quality, but no solution for establishing trust or authenticity at scale.",
-      "score": 9,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
     },
@@ -141,7 +112,7 @@
         7
       ],
       "title": "Minimalism as a Path to Understanding Complexity",
-      "explanation": "Three radically different domains converge on reduction as methodology: learn-claude builds an agent harness using only Bash ('Bash is all you need'), Oberon System 3 runs a complete OS on minimal Raspberry Pi hardware, and everything-claude emphasizes 'research-first development.' All three reject bloat in favor of foundational clarity—whether in scripting, systems, or agent architecture. The pattern reveals that understanding emerges not from adding features but from stripping to essential mechanisms.",
+      "explanation": "Three radically different domains converge on reduction as methodology: learn-claude builds an agent harness using only Bash ('Bash is all you need'), Oberon System 3 runs a complete OS on minimal Raspberry Pi hardware, and everything-claude emphasizes 'research-first development.' All three reject bloat in favor of foundational clarity\u2014whether in scripting, systems, or agent architecture. The pattern reveals that understanding emerges not from adding features but from stripping to essential mechanisms.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -176,35 +147,6 @@
       "prompt_version": "constellation_v1"
     },
     {
-      "neighborhood_hash": "22fb0f893286a82558ed15f9ad72ee5e6aaad323b1a2ff8bf9f81b262afdc97d",
-      "constellation_type": "absence",
-      "idea_ids": [
-        98,
-        103,
-        11
-      ],
-      "title": "Missing: The Reality Check Between Hype and Operations",
-      "explanation": "Ideas 98 and 103 expose the gap between startup ambition and operational reality—unrealistic hiring expectations and brutal conference economics. Idea 11 represents methodology hype. What's conspicuously absent is any discussion of sustainable, right-sized practices that bridge aspirational frameworks and actual resource constraints. The neighborhood has the extremes (grandiose posturing vs. harsh numbers) but lacks the pragmatic middle ground.",
-      "score": 6,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "33f64a483bc09161475729a14c28ddc29812f6e65bf89712401c5128737699c1",
-      "constellation_type": "convergence",
-      "idea_ids": [
-        3,
-        47,
-        65,
-        93
-      ],
-      "title": "Democratizing Entrepreneurship Through Casual Automation",
-      "explanation": "These ideas converge on removing traditional barriers to monetization and entrepreneurship. From automated money-making systems, to Pokemon card trading platforms, to no-code 'vibe coding' apps, to guerrilla user acquisition—all bypass conventional requirements (technical skill, capital, formal training). They represent a structural shift where sophistication is replaced by accessibility, enabling casual participation in previously gatekept domains. The pattern reveals entrepreneurship becoming an ambient activity rather than a dedicated profession.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
       "neighborhood_hash": "33f64a483bc09161475729a14c28ddc29812f6e65bf89712401c5128737699c1",
       "constellation_type": "triangulation",
       "idea_ids": [
@@ -213,7 +155,7 @@
         71
       ],
       "title": "The Illusion of Algorithmic Certainty",
-      "explanation": "A swarm intelligence engine that 'predicts anything,' data for AI reasoning in dynamic environments, and accessibility scores that lie—together these expose the gap between algorithmic confidence and actual validity. Each represents a different facet of the same problem: systems that provide definitive-seeming outputs while obscuring fundamental limitations in their methodology. The constellation reveals how automation creates false precision that masks uncertainty.",
+      "explanation": "A swarm intelligence engine that 'predicts anything,' data for AI reasoning in dynamic environments, and accessibility scores that lie\u2014together these expose the gap between algorithmic confidence and actual validity. Each represents a different facet of the same problem: systems that provide definitive-seeming outputs while obscuring fundamental limitations in their methodology. The constellation reveals how automation creates false precision that masks uncertainty.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -242,7 +184,7 @@
         56
       ],
       "title": "Missing: Provider-Facing Workflow Automation",
-      "explanation": "Four healthcare/service workflow tools all focus on administrative layers (patient management, scheduling, billing, recruiting) but conspicuously absent is anything automating the core professional work itself—the actual tutoring, medical diagnosis, or clinical decision-making. The gap reveals where AI deployment stops: automation handles everything around expertise but not expertise itself, suggesting either technical limitations or deliberate market positioning to avoid professional resistance.",
+      "explanation": "Four healthcare/service workflow tools all focus on administrative layers (patient management, scheduling, billing, recruiting) but conspicuously absent is anything automating the core professional work itself\u2014the actual tutoring, medical diagnosis, or clinical decision-making. The gap reveals where AI deployment stops: automation handles everything around expertise but not expertise itself, suggesting either technical limitations or deliberate market positioning to avoid professional resistance.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -256,7 +198,7 @@
         66
       ],
       "title": "Missing: The Constraints That Enable Creation",
-      "explanation": "These ideas represent three different responses to modern development culture: rejecting homogeneity (idiomatic design), embracing geographic constraints (EU-only infrastructure), and celebrating incremental progress (weekly wins). What's conspicuously absent is any discussion of how constraints themselves—whether aesthetic, regulatory, or temporal—actually catalyze better outcomes rather than merely limiting options. The gap is the synthesis: a framework for choosing productive constraints deliberately.",
+      "explanation": "These ideas represent three different responses to modern development culture: rejecting homogeneity (idiomatic design), embracing geographic constraints (EU-only infrastructure), and celebrating incremental progress (weekly wins). What's conspicuously absent is any discussion of how constraints themselves\u2014whether aesthetic, regulatory, or temporal\u2014actually catalyze better outcomes rather than merely limiting options. The gap is the synthesis: a framework for choosing productive constraints deliberately.",
       "score": 6,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -284,7 +226,7 @@
         36
       ],
       "title": "Interface Archaeology: Excavating Forgotten Interaction Paradigms",
-      "explanation": "A taskbar-style dock resurrects Windows UI conventions on Mac, a JVM options explorer makes arcane command-line flags navigable, and Doom runs through curl—a text-transfer protocol. Each project digs up buried or constrained interaction models and makes them viable again in contexts where they were abandoned or never belonged. Together they suggest that interface evolution discards useful paradigms that deserve intentional resurrection, not just nostalgic recreation.",
+      "explanation": "A taskbar-style dock resurrects Windows UI conventions on Mac, a JVM options explorer makes arcane command-line flags navigable, and Doom runs through curl\u2014a text-transfer protocol. Each project digs up buried or constrained interaction models and makes them viable again in contexts where they were abandoned or never belonged. Together they suggest that interface evolution discards useful paradigms that deserve intentional resurrection, not just nostalgic recreation.",
       "score": 8,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -298,7 +240,7 @@
         30
       ],
       "title": "Missing: Human-Scale Temporal Governance",
-      "explanation": "We have ideas spanning intergalactic eternities (idea 27), national energy infrastructure shifts (idea 24), and sudden corporate policy changes (idea 30)—vastly different time scales from billions of years to overnight. What's conspicuously absent is any discussion of governance, planning, or decision-making frameworks that operate at the messy middle: decade-to-century scales where human institutions must actually coordinate. The gap reveals our conceptual tools handle either cosmic abstraction or immediate crisis, but not intergenerational stewardship.",
+      "explanation": "We have ideas spanning intergalactic eternities (idea 27), national energy infrastructure shifts (idea 24), and sudden corporate policy changes (idea 30)\u2014vastly different time scales from billions of years to overnight. What's conspicuously absent is any discussion of governance, planning, or decision-making frameworks that operate at the messy middle: decade-to-century scales where human institutions must actually coordinate. The gap reveals our conceptual tools handle either cosmic abstraction or immediate crisis, but not intergenerational stewardship.",
       "score": 9,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -313,7 +255,7 @@
         120
       ],
       "title": "Missing Video Foundation Model",
-      "explanation": "This neighborhood contains foundation models spanning text reasoning (DeepSeek-R1), image generation (Stable Diffusion variants), audio transcription (Whisper), and text embeddings (sentence-transformers). The structural gap is video understanding/generation—the temporal-spatial modality that bridges static images and pure audio. Given the comprehensive coverage of other modalities and the popularity metrics suggesting a mature model ecosystem, the absence of a video foundation model is conspicuous.",
+      "explanation": "This neighborhood contains foundation models spanning text reasoning (DeepSeek-R1), image generation (Stable Diffusion variants), audio transcription (Whisper), and text embeddings (sentence-transformers). The structural gap is video understanding/generation\u2014the temporal-spatial modality that bridges static images and pure audio. Given the comprehensive coverage of other modalities and the popularity metrics suggesting a mature model ecosystem, the absence of a video foundation model is conspicuous.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -344,107 +286,6 @@
       "title": "Efficiency-Capability Tradeoff in Modal Encoding",
       "explanation": "These models represent different points on the spectrum between computational efficiency and representational power. Sentence-transformers (195M downloads, 4672 likes) achieves massive adoption through lightweight text embeddings. Kokoro-82M balances small size with audio synthesis. Whisper-large-v3 trades size for transcription accuracy. Stable Diffusion XL prioritizes generation quality over speed. The spectrum reveals how different modalities and use cases demand distinct efficiency-capability equilibria.",
       "score": 6,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "constellation_type": "triangulation",
-      "idea_ids": [
-        82,
-        91,
-        95
-      ],
-      "title": "Accidental Truth: When Transparency Reveals Product-Market Misalignment",
-      "explanation": "These three ideas converge on a profound insight: the gap between what founders think users want versus what actually resonates. A debug counter becomes a beloved feature (82), unlimited pricing attracts exploitative not ideal customers (91), and superior product quality fails without distribution (95). Together they reveal that founders systematically misunderstand value creation—building features users don't prioritize while accidentally discovering what they do, or optimizing the wrong constraint entirely.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "constellation_type": "convergence",
-      "idea_ids": [
-        42,
-        44,
-        52,
-        88
-      ],
-      "title": "The AI Maintenance Layer Nobody Asked For",
-      "explanation": "Four YC/SaaS companies independently converged on the same structural problem: AI creates new maintenance burdens (knowledge layers, voice agent testing, doc updates, customer support) rather than eliminating work. None are selling AI to do the primary job; all are selling AI to manage AI's side effects. This reveals a meta-problem where each wave of automation creates a new service layer to maintain the automation itself.",
-      "score": 7,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "constellation_type": "chain",
-      "idea_ids": [
-        83,
-        85,
-        96,
-        88
-      ],
-      "title": "From Pitch to Traction: The Unlearning Sequence",
-      "explanation": "A logical progression emerges: founders start by perfecting their one-sentence pitch (83), then spam launch directories (85), discover those don't work (96), try \"something different,\" and finally get their first customer (88). This chain reveals that customer acquisition requires systematically discarding conventional wisdom in sequence—each failure is a necessary prerequisite to discovering what actually works for that specific product.",
-      "score": 6,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "constellation_type": "absence",
-      "idea_ids": [
-        82,
-        91,
-        84,
-        88
-      ],
-      "title": "Missing: Intentional Customer Relationship Design",
-      "explanation": "These ideas reveal accidental customer interactions: unintended transparency (82), pricing abuse (91), AI-mediated arguing (84), and first-sale euphoria (88). What's conspicuously absent is any idea about deliberately designing customer relationships or communication patterns. The gap suggests founders are reactive to customer behavior rather than proactively shaping interaction norms, pricing psychology, or support boundaries from first principles.",
-      "score": 7,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "constellation_type": "convergence",
-      "idea_ids": [
-        34,
-        89,
-        41
-      ],
-      "title": "The Collapsing Infrastructure Rent Extraction Model",
-      "explanation": "Three different angles reveal how traditional SaaS moats built on infrastructure complexity are evaporating. One demonstrates operational costs compressed 500x, another shows compliance tooling replicated in hours via AI, and the third commoditizes integration complexity into libraries. Together they expose that charging premium prices for orchestrating commodity components is becoming untenable—the value is migrating from integration layers to either extreme simplicity or genuine domain expertise.",
-      "score": 9,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "constellation_type": "spectrum",
-      "idea_ids": [
-        34,
-        90,
-        89
-      ],
-      "title": "Revenue Models Ordered by Long-Term Value Capture",
-      "explanation": "These ideas form a spectrum from sustainable ($20 tech stack supporting $10K MRR recurring) to catastrophically short-sighted (lifetime deals cannibalizing $39/month subscriptions) to structurally vulnerable (high-price compliance tools with no defensibility against AI replication). The axis is durability of business model: recurring minimal-cost operations, one-time revenue that kills future cashflow, and high-margin services facing commoditization. The ordering reveals how pricing strategy intersects with operational leverage and competitive moats.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "constellation_type": "absence",
-      "idea_ids": [
-        89,
-        41,
-        34
-      ],
-      "title": "Missing: The Human Expertise Moat",
-      "explanation": "The neighborhood shows infrastructure becoming trivial (idea 34), integration complexity being abstracted away (idea 41), and compliance tooling replicated by AI (idea 89). Conspicuously absent is any idea defending the value of deep human expertise, consultative selling, or relationship-based moats—the traditional response when technical barriers fall. The gap reveals an unspoken anxiety: if neither technical complexity nor operational efficiency creates defensibility, what does?",
-      "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
     },
@@ -516,7 +357,7 @@
         70
       ],
       "title": "Missing: The Maintenance Reckoning",
-      "explanation": "All three ideas celebrate the creation phase—ripping DVDs to streaming, launching a SaaS, mastering observability callbacks—but none address the long-term maintenance burden these solutions create. The gap is the inevitable post-launch reality: who updates the streaming server when Cloudflare changes APIs, who supports accessibility SaaS customers at 2am, who maintains observability hooks as AI frameworks evolve. The neighborhood reveals builder optimism while omitting operational debt.",
+      "explanation": "All three ideas celebrate the creation phase\u2014ripping DVDs to streaming, launching a SaaS, mastering observability callbacks\u2014but none address the long-term maintenance burden these solutions create. The gap is the inevitable post-launch reality: who updates the streaming server when Cloudflare changes APIs, who supports accessibility SaaS customers at 2am, who maintains observability hooks as AI frameworks evolve. The neighborhood reveals builder optimism while omitting operational debt.",
       "score": 8,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -531,7 +372,7 @@
         118
       ],
       "title": "The Missing Bridge Between Models and Production Reality",
-      "explanation": "Three popular LLM models (Llama variants with millions of downloads) exist alongside a tutorial about observability challenges in AI deployment (cost, latency, auditability). What's conspicuously absent is any tooling or methodology for model selection and right-sizing—helping practitioners choose between 2B, 7B, or 8B parameters based on their specific observability constraints. The gap is the decision framework connecting model capabilities to production requirements.",
+      "explanation": "Three popular LLM models (Llama variants with millions of downloads) exist alongside a tutorial about observability challenges in AI deployment (cost, latency, auditability). What's conspicuously absent is any tooling or methodology for model selection and right-sizing\u2014helping practitioners choose between 2B, 7B, or 8B parameters based on their specific observability constraints. The gap is the decision framework connecting model capabilities to production requirements.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -587,7 +428,7 @@
         118
       ],
       "title": "Missing: The Flagship That Justifies the Ecosystem",
-      "explanation": "These three models represent Meta's LLaMA lineage at similar parameter scales (7-8B), spanning generations 2 through 3.1. The progression shows clear version evolution and format variation (base vs instruct vs chat), yet conspicuously absent is any larger-scale model (70B+) that would demonstrate why this ecosystem matters beyond efficiency. The gap reveals these are optimization artifacts—the neighborhood lacks the capability anchor that would justify the architectural choices being iterated.",
+      "explanation": "These three models represent Meta's LLaMA lineage at similar parameter scales (7-8B), spanning generations 2 through 3.1. The progression shows clear version evolution and format variation (base vs instruct vs chat), yet conspicuously absent is any larger-scale model (70B+) that would demonstrate why this ecosystem matters beyond efficiency. The gap reveals these are optimization artifacts\u2014the neighborhood lacks the capability anchor that would justify the architectural choices being iterated.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -601,66 +442,7 @@
         113
       ],
       "title": "Instruction-Following as Download Attractor Over Time",
-      "explanation": "Ordered chronologically (Llama-2-7b-chat → Meta-Llama-3-8B → Llama-3.1-8B-Instruct), these models show exponentially increasing downloads (439K → 3.1M → 9.2M) as Meta refined instruction-tuning approaches. The spectrum isn't about capability improvement but about deployment friction: chat-hf has lowest adoption, base model moderate, and instruct-optimized achieves 21x the downloads of the earliest version. This reveals that model popularity correlates less with generation number than with ready-to-deploy instruction alignment.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "constellation_type": "triangulation",
-      "idea_ids": [
-        87,
-        92,
-        102
-      ],
-      "title": "Performative Productivity as Desperation Theater",
-      "explanation": "Three solo founders from different continents reveal the same pathology: building complexity as a psychological defense against market rejection. The product designer with 70K followers chooses 12-hour SaaS builds over job hunting; the over-engineer perfects schemas for zero users; the Nepal student follows every \"right step\" into silence. Together they expose how startup culture's action-bias becomes paralysis when individuals lack the market feedback that teams force upon each other.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "constellation_type": "convergence",
-      "idea_ids": [
-        94,
-        100,
-        104
-      ],
-      "title": "The Competence-Authority Inversion Problem",
-      "explanation": "A structural critique emerges from three angles: founders make 0.1x decisions, a company processes $1M but can't pay servers, and the \"idea guy\" loses motivation despite domain expertise and network. Each reveals how startup mythology inverts competence and authority—the person with positional power often lacks operational judgment, while those with domain knowledge lack the structural position to execute. The gap between having legitimacy and having capability becomes the failure mode.",
-      "score": 9,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "constellation_type": "absence",
-      "idea_ids": [
-        87,
-        99,
-        102,
-        104,
-        92
-      ],
-      "title": "Missing: The Honest Quit Signal",
-      "explanation": "Five ideas show founders in varying stages of struggle—disabled job seeker, runway depletion, radio silence, demotivation, zero users—all accompanied by declarations of persistence (\"I will not promote,\" \"I will not quit\"). The neighborhood is saturated with grinding through failure but completely lacks discourse on intelligent exit criteria, pivoting frameworks, or graceful shutdown strategies. The absence reveals startup culture's inability to discuss when stopping is the skilled decision, not the cowardly one.",
-      "score": 7,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "constellation_type": "spectrum",
-      "idea_ids": [
-        101,
-        97,
-        99,
-        102
-      ],
-      "title": "Legitimacy Gradients: From Crime to Competence Signaling",
-      "explanation": "Four founder narratives arrange along an axis of social legitimacy-seeking. The steroid dealer leverages illicit success into legal credibility; the serial founder writes year-long posts to prove human authorship; the 18-year-old celebrates first revenue to establish founder identity; the Nepal student performs every \"right way\" ritual for validation. The spectrum reveals how founders at different legitimacy deficits perform increasingly elaborate credibility rituals, with the axis being distance from default institutional trust.",
+      "explanation": "Ordered chronologically (Llama-2-7b-chat \u2192 Meta-Llama-3-8B \u2192 Llama-3.1-8B-Instruct), these models show exponentially increasing downloads (439K \u2192 3.1M \u2192 9.2M) as Meta refined instruction-tuning approaches. The spectrum isn't about capability improvement but about deployment friction: chat-hf has lowest adoption, base model moderate, and instruct-optimized achieves 21x the downloads of the earliest version. This reveals that model popularity correlates less with generation number than with ready-to-deploy instruction alignment.",
       "score": 8,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -675,7 +457,7 @@
         111
       ],
       "title": "Missing the Open Infrastructure Enabling Proprietary Changes",
-      "explanation": "The neighborhood contains both proprietary service modifications (Anthropic's cache TTL downgrade) and popular open-source LLM models (Llama variants with massive downloads). What's conspicuously absent is any discussion of the infrastructure, tooling, or frameworks that bridge these worlds—the systems that let developers switch between proprietary and open models, or the economic/technical factors driving such migrations. The gap reveals how infrastructure discussions are orphaned from both service-level changes and model-level artifacts.",
+      "explanation": "The neighborhood contains both proprietary service modifications (Anthropic's cache TTL downgrade) and popular open-source LLM models (Llama variants with massive downloads). What's conspicuously absent is any discussion of the infrastructure, tooling, or frameworks that bridge these worlds\u2014the systems that let developers switch between proprietary and open models, or the economic/technical factors driving such migrations. The gap reveals how infrastructure discussions are orphaned from both service-level changes and model-level artifacts.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -698,20 +480,6 @@
     },
     {
       "neighborhood_hash": "245b23d36fa69e041da44d70e96bf90c195a9702564e2962ba123c833706af5c",
-      "constellation_type": "absence",
-      "idea_ids": [
-        34,
-        90,
-        41
-      ],
-      "title": "Missing: The Sustainable Growth Middle Path",
-      "explanation": "These ideas represent three extreme resource strategies: hyper-efficiency (#34), cash-now monetization (#90), and complexity abstraction (#41). What's conspicuously absent is any idea exploring sustainable growth models that balance immediate needs with long-term value—no gradual scaling, no hybrid monetization, no discussion of when to choose which strategy. The gap reveals the startup discourse's bias toward extremes rather than situational wisdom.",
-      "score": 7,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "245b23d36fa69e041da44d70e96bf90c195a9702564e2962ba123c833706af5c",
       "constellation_type": "convergence",
       "idea_ids": [
         111,
@@ -719,7 +487,7 @@
         118
       ],
       "title": "Popularity Inversely Correlates With Actual Deployment",
-      "explanation": "Three open-source LLM models show a striking pattern: the most-liked model (Meta-Llama-3-8B, 6511 likes) has moderate downloads (3.1M), while the less-liked Llama-3.1-8B-Instruct (5680 likes) has 3x more downloads (9.2M). This suggests a disconnect between social signaling (likes) and actual production use—possibly because instruction-tuned models serve practical needs while base models attract researcher attention. The gap between appreciation and deployment reveals how open-source AI adoption differs from traditional software.",
+      "explanation": "Three open-source LLM models show a striking pattern: the most-liked model (Meta-Llama-3-8B, 6511 likes) has moderate downloads (3.1M), while the less-liked Llama-3.1-8B-Instruct (5680 likes) has 3x more downloads (9.2M). This suggests a disconnect between social signaling (likes) and actual production use\u2014possibly because instruction-tuned models serve practical needs while base models attract researcher attention. The gap between appreciation and deployment reveals how open-source AI adoption differs from traditional software.",
       "score": 6,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -792,7 +560,7 @@
         113
       ],
       "title": "Missing: The Agent-Model Integration Layer",
-      "explanation": "We have minimal agent harnesses (13, 14) and we have the open LLM models (118, 111, 113), but conspicuously absent is tooling that specifically bridges lightweight agent frameworks with model selection/switching logic for open-weight models. The gap represents the missing middleware that would let developers easily build agent systems that can programmatically choose between Llama variants based on task requirements, cost, or latency constraints—the orchestration layer for model-agnostic agent architectures.",
+      "explanation": "We have minimal agent harnesses (13, 14) and we have the open LLM models (118, 111, 113), but conspicuously absent is tooling that specifically bridges lightweight agent frameworks with model selection/switching logic for open-weight models. The gap represents the missing middleware that would let developers easily build agent systems that can programmatically choose between Llama variants based on task requirements, cost, or latency constraints\u2014the orchestration layer for model-agnostic agent architectures.",
       "score": 6,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -807,7 +575,7 @@
         61
       ],
       "title": "Missing: The Inference Infrastructure Layer",
-      "explanation": "Three successive generations of Meta's Llama models show rapid evolution in open-source LLMs, while Doublezero represents the application layer (autonomous agents). The glaring absence is the middle infrastructure layer: tools for efficient deployment, serving, and orchestration of these models at scale. The neighborhood jumps from raw models to end-user applications without the critical plumbing that connects them—inference optimization, model serving frameworks, or deployment platforms.",
+      "explanation": "Three successive generations of Meta's Llama models show rapid evolution in open-source LLMs, while Doublezero represents the application layer (autonomous agents). The glaring absence is the middle infrastructure layer: tools for efficient deployment, serving, and orchestration of these models at scale. The neighborhood jumps from raw models to end-user applications without the critical plumbing that connects them\u2014inference optimization, model serving frameworks, or deployment platforms.",
       "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
@@ -823,21 +591,6 @@
       "title": "Democratization Through Elimination of Rent-Seeking",
       "explanation": "OpenScreen removes subscription rent from demo creation, Doublezero creates a marketplace removing platform monopolies from AI agents, and Llama-2 (as the first major open-source chat model) removed licensing rent from LLM access. All three represent different domains (screencasting, agent platforms, foundational models) converging on the same structural solution: eliminating recurring extraction points that gatekeep access to capability. The pattern reveals a broader shift from rent-based to ownership-based tool economics.",
       "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "8a4e6c8224c83513c1b8f391be9298c0783cc98a959932aba18d7d748c0aed15",
-      "constellation_type": "absence",
-      "idea_ids": [
-        91,
-        111,
-        113,
-        118
-      ],
-      "title": "The Missing Cost Management Infrastructure Layer",
-      "explanation": "Three open-source AI models with millions of downloads create the same underlying problem as the unlimited SaaS plan: computational resources that are easy to consume at scale but expensive to provision. The neighborhood contains examples of both uncontrolled usage (SaaS power users, mass model downloads) but conspicuously lacks any idea about rate limiting, usage tiering, or cost allocation mechanisms. The structural gap is the middleware that sits between generous access and economic sustainability.",
-      "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
     },
@@ -867,34 +620,6 @@
       "title": "Gatekeeping Through Proxy Metrics",
       "explanation": "A satirical piece on developer identity, a health debate about substitute ingredients, and a methodology framework all inadvertently address the same structural problem: communities defining legitimacy through surface-level criteria rather than outcomes. Whether it's \"real\" developers, \"healthier\" sweeteners, or \"working\" methodologies, each domain struggles with proxy measures that may miss the actual value proposition. The convergence reveals how professional and consumer communities alike default to credentialism over effectiveness.",
       "score": 6,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "0b3737d879b7cc3286a00ec792e99a3cf6ccb7fbf1d6a2e461fb5a39ff8a0b2d",
-      "constellation_type": "absence",
-      "idea_ids": [
-        87,
-        60,
-        105
-      ],
-      "title": "The Missing Middle: Founder Support Infrastructure Gap",
-      "explanation": "We have desperate solo founders (#87), back-office commodities for startups (#60), and distribution advice (#105), but what's absent is the financial/operational bridge that would prevent the crisis in #87. There's no idea addressing runway extension, fractional work arrangements, or founder safety nets—the gap between \"I'm building alone\" and \"I have professional infrastructure.\" The neighborhood reveals a structural hole: founders get advice and tools, but not the adaptive support systems that would let them survive the building phase.",
-      "score": 8,
-      "model": "claude-sonnet-4-5-20250929",
-      "prompt_version": "constellation_v1"
-    },
-    {
-      "neighborhood_hash": "0b3737d879b7cc3286a00ec792e99a3cf6ccb7fbf1d6a2e461fb5a39ff8a0b2d",
-      "constellation_type": "convergence",
-      "idea_ids": [
-        87,
-        105,
-        60
-      ],
-      "title": "Survival Theater: When Hustle Culture Meets Structural Failure",
-      "explanation": "A desperate founder burning runway (#87) is told to \"focus on 1-2 channels\" (#105) while companies like Central (#60) sell startup infrastructure—but none address the core problem: the founder can't afford to wait for distribution to work. All three inadvertently expose how startup advice and tooling assume privilege (time, capital) that solo founders lack. The convergence reveals that \"best practices\" are structural luxuries disguised as universal wisdom.",
-      "score": 7,
       "model": "claude-sonnet-4-5-20250929",
       "prompt_version": "constellation_v1"
     }
@@ -942,7 +667,7 @@
     {
       "cluster_hash": "09f7d684369a2e560172db68fb5a403b3b42fae808122dafe4dfedde38626fbf",
       "pattern_title": "Meta-tools eating their own tail",
-      "pattern_description": "A striking pattern of tools that exist primarily to document, explain, or optimize themselves rather than solve external problems. A skills directory pulled from a config file, a website explaining how it builds itself, optimizing the platform you're posting on. This suggests a cultural moment where developers are increasingly turning inward—building infrastructure about infrastructure, meta-layers upon meta-layers. It reveals anxiety about the disappearing boundary between the tool and the toolmaker.",
+      "pattern_description": "A striking pattern of tools that exist primarily to document, explain, or optimize themselves rather than solve external problems. A skills directory pulled from a config file, a website explaining how it builds itself, optimizing the platform you're posting on. This suggests a cultural moment where developers are increasingly turning inward\u2014building infrastructure about infrastructure, meta-layers upon meta-layers. It reveals anxiety about the disappearing boundary between the tool and the toolmaker.",
       "idea_ids": [
         2,
         78,
@@ -955,7 +680,7 @@
     {
       "cluster_hash": "09f7d684369a2e560172db68fb5a403b3b42fae808122dafe4dfedde38626fbf",
       "pattern_title": "Automation of judgment domains",
-      "pattern_description": "These projects share an implicit assumption that AI can replace human judgment in high-stakes domains traditionally requiring licensed expertise and intuition—financial trading, insurance underwriting, energy market timing. The revealing absence is any mention of human oversight or hybrid decision-making. This signals a paradigm shift from 'AI as advisor' to 'AI as autonomous actor' in consequential economic decisions, with surprisingly little friction.",
+      "pattern_description": "These projects share an implicit assumption that AI can replace human judgment in high-stakes domains traditionally requiring licensed expertise and intuition\u2014financial trading, insurance underwriting, energy market timing. The revealing absence is any mention of human oversight or hybrid decision-making. This signals a paradigm shift from 'AI as advisor' to 'AI as autonomous actor' in consequential economic decisions, with surprisingly little friction.",
       "idea_ids": [
         10,
         49,
@@ -967,7 +692,7 @@
     {
       "cluster_hash": "09f7d684369a2e560172db68fb5a403b3b42fae808122dafe4dfedde38626fbf",
       "pattern_title": "Absurdism as technical criticism",
-      "pattern_description": "The April Fools submissions aren't just jokes—they're pointed critiques disguised as humor. A stress-inducing editor mocks 'vibe coding' hype, a chaos AI butler satirizes over-automated assistants, a self-explaining website parodies navel-gazing tech. This is developer culture processing its discomfort with current AI/automation trends through comedic resistance. The absurdity is the message: 'we see the emperor has no clothes.'",
+      "pattern_description": "The April Fools submissions aren't just jokes\u2014they're pointed critiques disguised as humor. A stress-inducing editor mocks 'vibe coding' hype, a chaos AI butler satirizes over-automated assistants, a self-explaining website parodies navel-gazing tech. This is developer culture processing its discomfort with current AI/automation trends through comedic resistance. The absurdity is the message: 'we see the emperor has no clothes.'",
       "idea_ids": [
         74,
         75,
@@ -1057,50 +782,12 @@
     },
     {
       "cluster_hash": "e3f69563b86d8690f538f9283635e7ae1eeda4b7e611c4c1ef26b88a7a14b4af",
-      "pattern_title": "The Democratization-Quality Paradox",
-      "pattern_description": "These ideas collectively reveal a tension point in current tech: tools are racing to make powerful capabilities (video production, AI agents, on-device ML) freely accessible to everyone, while simultaneously the ecosystem is flooding with low-quality outputs from these same democratized tools. The 'AI slop' complaint emerges precisely because barriers to creation have collapsed. This suggests we're entering a phase where the bottleneck shifts from 'can you make it' to 'should you make it' - curation and taste become the scarce resource.",
-      "idea_ids": [
-        5,
-        12,
-        61,
-        86
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "e3f69563b86d8690f538f9283635e7ae1eeda4b7e611c4c1ef26b88a7a14b4af",
       "pattern_title": "The Disappearing Cloud Dependency",
       "pattern_description": "Multiple projects here share an implicit rejection of the SaaS/cloud-dependent model that dominated the 2010s. On-device ML, local model galleries, and open-source tools with 'no subscriptions' signal a counter-movement toward computational sovereignty. This represents a quiet ideological shift: users reclaiming processing power from centralized platforms, possibly driven by privacy concerns, cost fatigue, or distrust of platform lock-in.",
       "idea_ids": [
         12,
         17,
         5
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "e3f69563b86d8690f538f9283635e7ae1eeda4b7e611c4c1ef26b88a7a14b4af",
-      "pattern_title": "Performance Legibility as Trust Signal",
-      "pattern_description": "An emerging anxiety about authenticity runs through these: hiring based on observable AI usage patterns, concerns about hallucinated data poisoning decision-making, and autonomous agents needing to prove value. The underlying current is that as AI capabilities become universal, the differentiator becomes demonstrable human judgment and transparent process. We're moving from 'what did you build' to 'how did you think while building it' as the core evaluation metric.",
-      "idea_ids": [
-        54,
-        86,
-        61
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "22fb0f893286a82558ed15f9ad72ee5e6aaad323b1a2ff8bf9f81b262afdc97d",
-      "pattern_title": "The Cognitive Burden of Professional Performance",
-      "pattern_description": "Multiple ideas reveal anxiety about the performance demands placed on tech professionals - the exhaustion of being always-on, the absurdity of gatekeeping developer identity, startup interview processes mimicking Big Tech theater, and the hidden labor behind community building. This suggests a growing cultural reckoning with unsustainable professional expectations that the industry has normalized.",
-      "idea_ids": [
-        81,
-        98,
-        63,
-        103
       ],
       "model": "claude-opus-4-5-20251101",
       "prompt_version": "patterns_v1"
@@ -1113,19 +800,6 @@
         59,
         11,
         28
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "22fb0f893286a82558ed15f9ad72ee5e6aaad323b1a2ff8bf9f81b262afdc97d",
-      "pattern_title": "Absence of Collective Solutions",
-      "pattern_description": "What's notably missing across these ideas is any mention of unions, collective bargaining, or structural reform. Individual coping strategies, personal frameworks, and entrepreneurial grit are presented as solutions to systemic problems (burnout, exploitative interviews, unsustainable conference economics). This reveals tech's continued ideological commitment to individual agency even when discussing collective suffering.",
-      "idea_ids": [
-        81,
-        98,
-        103,
-        11
       ],
       "model": "claude-opus-4-5-20251101",
       "prompt_version": "patterns_v1"
@@ -1204,31 +878,6 @@
     },
     {
       "cluster_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "pattern_title": "Accidental features outperform intentional ones",
-      "pattern_description": "A quiet paradigm shift: users are discovering value in things builders considered bugs or oversights. The debug mode counter, the 'unlimited' loophole exploiters, and the ChatGPT-assisted customer arguments all reveal that what companies build intentionally matters less than what emerges from real usage. This suggests a move from 'designed products' toward 'discovered products' — where the market teaches you what you actually made.",
-      "idea_ids": [
-        82,
-        91,
-        84
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
-      "pattern_title": "The collapse of the sales funnel into proof-of-work",
-      "pattern_description": "Distribution anxiety dominates founder discourse, but the actual solutions being discovered bypass traditional marketing entirely. The pattern shows exhaustion with 'by the book' growth tactics and a shift toward raw evidence of value (first paying customer as emotional milestone, curated launch directories as credibility proxies). The implicit assumption: customers now require witnessing other humans validate a product before engaging. Marketing is becoming archaeology rather than broadcasting.",
-      "idea_ids": [
-        95,
-        96,
-        85,
-        88
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "48ac3858a15f1ac17ff81811c52fc09930c0bdbf91dd9809cb0ae3e15befb9ba",
       "pattern_title": "Infrastructure as the new interface",
       "pattern_description": "These tools share an assumption that the 'product' users interact with is increasingly just a thin shell over complex backend systems. Voice agents need monitoring, AI needs a 'knowledge layer,' docs update themselves, HFT moves onto chips. The locus of value has shifted from what users see to what runs underneath. This signals a coming era where most software companies are actually infrastructure companies pretending to be applications.",
       "idea_ids": [
@@ -1241,44 +890,9 @@
       "prompt_version": "patterns_v1"
     },
     {
-      "cluster_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "pattern_title": "The Compression Economy",
-      "pattern_description": "These ideas share an implicit assumption that enterprise-grade capabilities are being radically compressed - in cost, time, and complexity. Running multiple profitable companies on $20/month, building a $10K-$80K competitor in 8.5 hours, turning complex integrations into 'drop-in' libraries. The undercurrent is a belief that the traditional correlation between business value and operational cost is breaking down. This signals a paradigm shift where 'infrastructure as competitive moat' is eroding rapidly.",
-      "idea_ids": [
-        34,
-        89,
-        41
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "pattern_title": "The Premature Monetization Trap",
-      "pattern_description": "Both reveal a tension between short-term capital needs and long-term value capture. The lifetime deal disaster ($50K that killed recurring revenue) and the AI-rebuilt compliance tool (questioning what 'moat' even means now) expose a shared anxiety: founders are increasingly unsure WHEN to extract value from their creations, because the shelf-life of software advantages is collapsing. The implicit question is whether traditional SaaS pricing models are misaligned with how quickly value can now be replicated.",
-      "idea_ids": [
-        90,
-        89
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "45f4b88026fe1215852356eb81cf6c5964f87941af28520daa96471dc1daebb6",
-      "pattern_title": "The Solo-Scale Paradox",
-      "pattern_description": "A revealing absence: none of these mention teams. Multiple $10K MRR companies run by one person, an 8.5-hour solo AI build, a solo founder doing lifetime deals to fund development alone. There's an unspoken cultural shift toward single-operator businesses at scales previously requiring teams. This isn't just about tools - it's about a redefinition of what 'company' means, where the unit of entrepreneurship is shrinking to the individual while output scales up.",
-      "idea_ids": [
-        34,
-        89,
-        90
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
       "cluster_hash": "ff80c2ea36e84738b36d6a91529f9bea1ac1838cd47e8b9dd2f6b12dc0b85a0b",
       "pattern_title": "The Commoditization of Reasoning",
-      "pattern_description": "These models represent a quiet paradigm shift: reasoning and language generation—once considered uniquely human cognitive labor—are being packaged as downloadable utilities. The massive download counts suggest reasoning is becoming infrastructure, not product. The revealing absence is any moat or differentiation strategy; they compete on benchmarks and efficiency, treating intelligence as a commodity. This mirrors how electricity or computing cycles were commoditized in earlier eras.",
+      "pattern_description": "These models represent a quiet paradigm shift: reasoning and language generation\u2014once considered uniquely human cognitive labor\u2014are being packaged as downloadable utilities. The massive download counts suggest reasoning is becoming infrastructure, not product. The revealing absence is any moat or differentiation strategy; they compete on benchmarks and efficiency, treating intelligence as a commodity. This mirrors how electricity or computing cycles were commoditized in earlier eras.",
       "idea_ids": [
         107,
         119,
@@ -1291,7 +905,7 @@
     {
       "cluster_hash": "ff80c2ea36e84738b36d6a91529f9bea1ac1838cd47e8b9dd2f6b12dc0b85a0b",
       "pattern_title": "The Physics Envy of Foundation Models",
-      "pattern_description": "Trim's 'foundation model for physics' sits oddly among image generators, but there's a shared implicit assumption: that complex phenomena (visual reality, physical laws) can be compressed into learnable statistical manifolds. This betrays a belief that the universe has a 'latent space'—that reality itself is generatable from learned priors. The cultural undercurrent is a neo-positivist faith that enough data reveals fundamental structure, essentially using ML as the new reductionism.",
+      "pattern_description": "Trim's 'foundation model for physics' sits oddly among image generators, but there's a shared implicit assumption: that complex phenomena (visual reality, physical laws) can be compressed into learnable statistical manifolds. This betrays a belief that the universe has a 'latent space'\u2014that reality itself is generatable from learned priors. The cultural undercurrent is a neo-positivist faith that enough data reveals fundamental structure, essentially using ML as the new reductionism.",
       "idea_ids": [
         37,
         109,
@@ -1304,7 +918,7 @@
     {
       "cluster_hash": "ff80c2ea36e84738b36d6a91529f9bea1ac1838cd47e8b9dd2f6b12dc0b85a0b",
       "pattern_title": "The Silent Death of Specialization",
-      "pattern_description": "Kokoro (TTS), Whisper (transcription), and sentence-transformers (embeddings) are hyper-specialized tools with enormous adoption. But their presence alongside generalist models reveals a paradox: as models get more general, the ecosystem fragments into specialized microservices. The implicit assumption is that AGI won't arrive as one model, but as an orchestration layer over many narrow experts. This is the opposite of the unified AGI narrative being sold—the actual infrastructure is becoming more balkanized, not less.",
+      "pattern_description": "Kokoro (TTS), Whisper (transcription), and sentence-transformers (embeddings) are hyper-specialized tools with enormous adoption. But their presence alongside generalist models reveals a paradox: as models get more general, the ecosystem fragments into specialized microservices. The implicit assumption is that AGI won't arrive as one model, but as an orchestration layer over many narrow experts. This is the opposite of the unified AGI narrative being sold\u2014the actual infrastructure is becoming more balkanized, not less.",
       "idea_ids": [
         112,
         114,
@@ -1316,7 +930,7 @@
     {
       "cluster_hash": "56a83d2f1f80d7389e5440fd434154bd8ab0c12e82cce40128368b3ac6bd2440",
       "pattern_title": "Democratization of Previously Elite Production Capabilities",
-      "pattern_description": "These projects share an implicit assumption that capabilities once requiring massive capital, specialized facilities, or expert teams (satellite manufacturing, Hollywood-quality visuals, music production, animation) should be accessible to individuals through software abstraction. The underlying paradigm shift is from 'production requires infrastructure' to 'production requires only intent.' Reditus Space applies this to physical manufacturing in orbit, while the AI tools apply it to creative production—both are collapsing traditional barriers between imagination and realization.",
+      "pattern_description": "These projects share an implicit assumption that capabilities once requiring massive capital, specialized facilities, or expert teams (satellite manufacturing, Hollywood-quality visuals, music production, animation) should be accessible to individuals through software abstraction. The underlying paradigm shift is from 'production requires infrastructure' to 'production requires only intent.' Reditus Space applies this to physical manufacturing in orbit, while the AI tools apply it to creative production\u2014both are collapsing traditional barriers between imagination and realization.",
       "idea_ids": [
         46,
         108,
@@ -1333,7 +947,7 @@
     {
       "cluster_hash": "56a83d2f1f80d7389e5440fd434154bd8ab0c12e82cce40128368b3ac6bd2440",
       "pattern_title": "The Disappearance of the Prototype Phase",
-      "pattern_description": "These tools eliminate the gap between concept and finished output. Virtual try-on skips physical samples, comic factory bypasses storyboarding, FLUX.1-schnell emphasizes speed over iteration. The cultural undercurrent is an impatience with process itself—a belief that intermediate steps are inefficiencies rather than learning opportunities. This reveals an emerging assumption that creation should be instantaneous, potentially signaling a future tension between rapid output and craft development.",
+      "pattern_description": "These tools eliminate the gap between concept and finished output. Virtual try-on skips physical samples, comic factory bypasses storyboarding, FLUX.1-schnell emphasizes speed over iteration. The cultural undercurrent is an impatience with process itself\u2014a belief that intermediate steps are inefficiencies rather than learning opportunities. This reveals an emerging assumption that creation should be instantaneous, potentially signaling a future tension between rapid output and craft development.",
       "idea_ids": [
         124,
         123,
@@ -1347,53 +961,11 @@
     {
       "cluster_hash": "56a83d2f1f80d7389e5440fd434154bd8ab0c12e82cce40128368b3ac6bd2440",
       "pattern_title": "Benchmarking as the New Currency of Trust",
-      "pattern_description": "The presence of the MTEB leaderboard alongside download/like metrics reveals an undercurrent where quantified comparison has become the primary trust mechanism for adopting new capabilities. The significant absence here is any human curation or editorial voice—trust is algorithmic and crowd-derived. This signals a paradigm where authority flows from measurable performance rather than institutional endorsement, fundamentally changing how innovations gain legitimacy.",
+      "pattern_description": "The presence of the MTEB leaderboard alongside download/like metrics reveals an undercurrent where quantified comparison has become the primary trust mechanism for adopting new capabilities. The significant absence here is any human curation or editorial voice\u2014trust is algorithmic and crowd-derived. This signals a paradigm where authority flows from measurable performance rather than institutional endorsement, fundamentally changing how innovations gain legitimacy.",
       "idea_ids": [
         126,
         108,
         117
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "pattern_title": "The Performative Vulnerability Economy",
-      "pattern_description": "There's a striking pattern of founders publicly confessing struggle, desperation, and near-failure as a form of social currency. The repeated 'I will not promote' disclaimers alongside deeply personal stories (single parent with runway anxiety, prison redemption arc, feeling delusional) suggests a new implicit contract: vulnerability is the new marketing. These aren't private journal entries—they're strategically posted to build audience through relatability. This represents a shift from 'fake it till you make it' to 'break down publicly to build up authentically.'",
-      "idea_ids": [
-        87,
-        99,
-        100,
-        101,
-        102,
-        104
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "pattern_title": "The Disappearing Middle Path",
-      "pattern_description": "These ideas reveal an implicit assumption that moderate success is no longer viable. You're either a '10x engineer' or a '0.1x decision-maker' who ruins everything. You either have $1M in transactions but can't pay server costs, or you're spending 12 hours daily betting everything on a SaaS. The job market 'sucks' so you over-engineer for zero users. There's no narrative of sustainable, incremental growth—only all-in desperation or spectacular failure. The middle class of entrepreneurship is being ideologically erased.",
-      "idea_ids": [
-        72,
-        87,
-        92,
-        94,
-        100
-      ],
-      "model": "claude-opus-4-5-20251101",
-      "prompt_version": "patterns_v1"
-    },
-    {
-      "cluster_hash": "6c6f9a1abba35eb70a7844f1ebfef7bc9322429f38d8daa315c7caecaf1b1eb0",
-      "pattern_title": "Infrastructure as Avoidance Ritual",
-      "pattern_description": "Multiple ideas orbit around building elaborate systems (payroll compliance tools, over-engineered database schemas, promotion frameworks) before confronting the core uncertainty: does anyone want this? The fintech 'idea guy' has networks and coworkers but no product. The 'How to promote' post exists for a project still being built. This reveals a cultural pattern where founders use infrastructure complexity as a socially acceptable form of procrastination—it looks like progress while deferring the terrifying moment of market validation.",
-      "idea_ids": [
-        60,
-        92,
-        104,
-        106
       ],
       "model": "claude-opus-4-5-20251101",
       "prompt_version": "patterns_v1"
@@ -1515,7 +1087,7 @@
       "title": "666ghj/MiroFish",
       "source": "github",
       "category": "",
-      "description": "A Simple and Universal Swarm Intelligence Engine, Predicting Anything. 简洁通用的群体智能引擎，预测万物"
+      "description": "A Simple and Universal Swarm Intelligence Engine, Predicting Anything. \u7b80\u6d01\u901a\u7528\u7684\u7fa4\u4f53\u667a\u80fd\u5f15\u64ce\uff0c\u9884\u6d4b\u4e07\u7269"
     },
     "9": {
       "title": "mvanhorn/last30days-skill",
@@ -1545,7 +1117,7 @@
       "title": "shareAI-lab/learn-claude-code",
       "source": "github",
       "category": "",
-      "description": "Bash is all you need - A nano claude code–like 「agent harness」, built from 0 to 1"
+      "description": "Bash is all you need - A nano claude code\u2013like \u300cagent harness\u300d, built from 0 to 1"
     },
     "14": {
       "title": "Yeachan-Heo/oh-my-claudecode",
@@ -1572,7 +1144,7 @@
       "description": ""
     },
     "18": {
-      "title": "Show HN: boringBar – a taskbar-style dock replacement for macOS",
+      "title": "Show HN: boringBar \u2013 a taskbar-style dock replacement for macOS",
       "source": "hn",
       "category": "",
       "description": "HN score: 48 | comments: 29"
@@ -1650,7 +1222,7 @@
       "description": "HN score: 345 | comments: 252"
     },
     "31": {
-      "title": "Phyphox – Physical Experiments Using a Smartphone",
+      "title": "Phyphox \u2013 Physical Experiments Using a Smartphone",
       "source": "hn",
       "category": "",
       "description": "HN score: 141 | comments: 26"
@@ -1707,13 +1279,13 @@
       "title": "PAX Markets",
       "source": "yc",
       "category": "",
-      "description": "More 𝛼, less latency: exchange and HFT on one chip."
+      "description": "More \ud835\udefc, less latency: exchange and HFT on one chip."
     },
     "41": {
       "title": "ReJot",
       "source": "yc",
       "category": "",
-      "description": "We turn complex API integrations into drop‑in full‑stack libraries "
+      "description": "We turn complex API integrations into drop\u2011in full\u2011stack libraries "
     },
     "42": {
       "title": "SAMMY Labs",
@@ -1842,10 +1414,10 @@
       "description": "Welcome to this week's Top 7, where the DEV editorial team handpicks their favorite posts from the... | tags: top7, discuss | reactions: 79"
     },
     "63": {
-      "title": "You’re a Real Software Developer Only If…",
+      "title": "You\u2019re a Real Software Developer Only If\u2026",
       "source": "devto",
       "category": "",
-      "description": "Uff, I’m finally done with my talk at jsDay 2026!  And honestly? It went at least good. People showed... | tags: jokes, devlive | reactions: 154"
+      "description": "Uff, I\u2019m finally done with my talk at jsDay 2026!  And honestly? It went at least good. People showed... | tags: jokes, devlive | reactions: 154"
     },
     "64": {
       "title": "Converting old home movie DVDs into a private streaming site",
@@ -1863,7 +1435,7 @@
       "title": "What was your win this week??",
       "source": "devto",
       "category": "",
-      "description": "👋👋👋👋  Looking back on your week -- what was something you're proud of?  All wins count -- big or... | tags: discuss, weeklyretro | reactions: 26"
+      "description": "\ud83d\udc4b\ud83d\udc4b\ud83d\udc4b\ud83d\udc4b  Looking back on your week -- what was something you're proud of?  All wins count -- big or... | tags: discuss, weeklyretro | reactions: 26"
     },
     "67": {
       "title": "Sharing CodePen 2.0 demos on DEV",
@@ -1914,10 +1486,10 @@
       "description": "This is a submission for the DEV April Fools Challenge  Quantum Collapse is a React editor that... | tags: devchallenge, 418challenge, showdev | reactions: 31"
     },
     "75": {
-      "title": "AS’ HTCPCP AI Butler™ — The AI That Brews Chaos, Not Coffee 418% Chaos: Your Useless AI Butler",
+      "title": "AS\u2019 HTCPCP AI Butler\u2122 \u2014 The AI That Brews Chaos, Not Coffee 418% Chaos: Your Useless AI Butler",
       "source": "devto",
       "category": "",
-      "description": "This is a submission for the DEV April Fools Challenge           🍵 AS’ HTCPCP AI Butler™ 🤖       ... | tags: devchallenge, 418challenge, showdev | reactions: 32"
+      "description": "This is a submission for the DEV April Fools Challenge           \ud83c\udf75 AS\u2019 HTCPCP AI Butler\u2122 \ud83e\udd16       ... | tags: devchallenge, 418challenge, showdev | reactions: 32"
     },
     "76": {
       "title": "Clawshier OpenClaw Skill",
@@ -1954,156 +1526,6 @@
       "source": "devto",
       "category": "",
       "description": "It Started With Just One Thing   Last month, I closed my laptop at 11 PM.  Then I opened it... | tags: career, mentalhealth, webdev, discuss | reactions: 63"
-    },
-    "82": {
-      "title": "Our dev accidentally pushed a debug mode to production. Users could see server response times. They loved it.",
-      "source": "reddit",
-      "category": "",
-      "description": "Debug mode left a small counter in the bottom corner showing API response times in milliseconds. \"47ms.\" \"23ms.\" \"91ms.\"\n\nMeant to remove it immediately. Then customer emails started coming in. \"Love  | r/SaaS | score: 346 | comments: 95"
-    },
-    "83": {
-      "title": "Sell me your Saas in one sentence!",
-      "source": "reddit",
-      "category": "",
-      "description": "go =) | r/SaaS | score: 212 | comments: 619"
-    },
-    "84": {
-      "title": "Customer is using ChatGPT to argue with my support team and it's kind of hilarious",
-      "source": "reddit",
-      "category": "",
-      "description": "I run a small B2B SaaS company. We had a customer who created 5 separate accounts, got billed for all of them, then spent two months demanding refunds and threatening legal action.\n\nWe handled it pati | r/SaaS | score: 206 | comments: 57"
-    },
-    "85": {
-      "title": "Places to launch your startup [ 2026 Updated ]",
-      "source": "reddit",
-      "category": "",
-      "description": "\n\nDR 90+\n\n\n\nSourceForge : DR 92\n\nG2 : DR 91\n\nProduct Hunt : DR 91\n\nHacker News : DR 91\n\nCapterra : DR 90\n\n\n\nDR 80-89\n\n\n\nSoftonic : DR 87\n\nGoodFirms : DR 83\n\nAppSumo : DR 82\n\nIndie Hackers : DR 82\n\nFaz | r/SaaS | score: 160 | comments: 110"
-    },
-    "86": {
-      "title": "We are drowning in AI SLOP and it is getting dangerous",
-      "source": "reddit",
-      "category": "",
-      "description": "What I am observing is AI slop trends. People asking LLMs like chatgpt, claude, gemini to come up with ideas, those models hallucinate the data and come up with arbitrary number for example selling AI | r/SaaS | score: 140 | comments: 114"
-    },
-    "87": {
-      "title": "I have a few months of runway left. A 5 year old who depends on me. And I'm spending 12 hours a day building a SaaS instead of getting a job",
-      "source": "reddit",
-      "category": "",
-      "description": "I'm a product designer. The market is dying. Fewer jobs every month. The rates keep dropping. I spent a year watching it happen.\n\nI have 70K followers on LinkedIn. Built it over years. It's how I get  | r/SaaS | score: 137 | comments: 242"
-    },
-    "88": {
-      "title": "Just got my first paying customer and I'm losing my mind",
-      "source": "reddit",
-      "category": "",
-      "description": "I've been building [Namiru.ai](http://Namiru.ai) for months. It's an AI customer support widget - you paste your website URL, the AI learns your content in 30 seconds, and it starts answering your cus | r/SaaS | score: 131 | comments: 189"
-    },
-    "89": {
-      "title": "I built an open-source competitor to Delve ($10K-$80K/year) in 8.5 hours using AI. Here’s what that means for SaaS moats.",
-      "source": "reddit",
-      "category": "",
-      "description": "I’ve run a cybersecurity company for 25 years. I’ve seen hundreds of startups go through SOC 2, ISO 27001, and HIPAA compliance. Most of them pay $10K to $80K a year for tools like Vanta, Drata, or Se | r/SaaS | score: 127 | comments: 130"
-    },
-    "90": {
-      "title": "$50k selling lifetime deals.. my worst mistake!",
-      "source": "reddit",
-      "category": "",
-      "description": "needed money to fund development so i ran a lifetime deal promotion. $149 for lifetime access to a product i was charging $39/month for\n\nsold 340 of them in 2 weeks. $50k in revenue. felt amazing\n\n18  | r/SaaS | score: 116 | comments: 110"
-    },
-    "91": {
-      "title": "Offered unlimited usage on our entry plan. 4 power users consumed 60% of our server costs while paying $29/mo each.",
-      "source": "reddit",
-      "category": "",
-      "description": "$29/mo plan. \"Unlimited projects. Unlimited storage. Unlimited API calls.\" Sounded generous. Good marketing.\n\nThen 4 users discovered exactly how unlimited we meant.\n\nOne was running an automated proc | r/SaaS | score: 103 | comments: 45"
-    },
-    "92": {
-      "title": "the 'side project' is dead. Solo founders are operating like entire micro-startups now.",
-      "source": "reddit",
-      "category": "",
-      "description": "i just spent the last two weeks over-engineering a database schema for a SaaS that currently has exactly zero paying users. Was procrastinating yesterday and went down a rabbit hole looking at the par | r/SaaS | score: 96 | comments: 73"
-    },
-    "93": {
-      "title": "how i got my first 10 paying users without spending a dime on ads",
-      "source": "reddit",
-      "category": "",
-      "description": "most people think you need a massive launch or a big ad budget to get started.\n\ni found out the hard way that doesn't really work when you're at zero.\n\nfor my first 10 customers, i basically just live | r/SaaS | score: 93 | comments: 91"
-    },
-    "94": {
-      "title": "The \"10x engineer\" doesn't exist. But the \"0.1x decision-maker\" absolutely does and it's usually the founder.",
-      "source": "reddit",
-      "category": "",
-      "description": "Everyone talks about 10x engineers. Mythical developers who produce 10 times the output of average engineers.\n\nNobody talks about the 0.1x decision-maker. The person who assigns the 10x engineer to bu | r/SaaS | score: 92 | comments: 16"
-    },
-    "95": {
-      "title": "Building SaaS is easy compared to distribution",
-      "source": "reddit",
-      "category": "",
-      "description": "We’ve been working with some SaaS tools and it’s crazy how growth really depends on how users will act. like even if the tool is good (and some of them are really solid) those small businesses could j | r/SaaS | score: 83 | comments: 163"
-    },
-    "96": {
-      "title": "What was your first channel for SaaS marketing that actually worked?",
-      "source": "reddit",
-      "category": "",
-      "description": "I launched a small SaaS recently and did everything “by the book”: landing page; analytics; some paid traffic. Result: basically zero. Then I tried something different.\n\nInstead of pushing traffic, I  | r/SaaS | score: 80 | comments: 216"
-    },
-    "97": {
-      "title": "I'm a Serial Founder. Here's how I come up with Business Ideas. I will not promote.",
-      "source": "reddit",
-      "category": "",
-      "description": "**NO AI WAS USED IN WRITING THIS** I have been working on this post for over a year, it's all my own content, nothing from a model.  I'll leave a screenshot showing the markdown files with dates in th | r/startups | score: 441 | comments: 82"
-    },
-    "98": {
-      "title": "Startups acting like they are Meta - I will not promote",
-      "source": "reddit",
-      "category": "",
-      "description": "I interviewed last week for a Senior Account Management role at a SaaS startup and honestly left the interview cringing.\n\nIt was only a first stage interview and the internal recruiter mentioned there | r/startups | score: 260 | comments: 75"
-    },
-    "99": {
-      "title": "Solo founder, 18 years old. Just closed my first paid subscriber. Wanted to share what the early stage actually feels like.(I will not promote)",
-      "source": "reddit",
-      "category": "",
-      "description": "I've been building a voice-first AI mental wellness app for the past several months completely solo. No team, no funding, no connections. Just a problem I cared about and enough stubbornness to keep s | r/startups | score: 51 | comments: 51"
-    },
-    "100": {
-      "title": "We have 140k users, over $1m in revenue, and multiple successful events. But we are barely able to pay server costs. Looking for advice on next steps. I will not promote",
-      "source": "reddit",
-      "category": "",
-      "description": "Edit: $1m processed transactions, not revenue. Made a mistake there. \n\nTldr: Built a company with lots of users and good revenue but that revenue doesn't come to me yet. Need advice on next steps.\n\n(A | r/startups | score: 50 | comments: 135"
-    },
-    "101": {
-      "title": "My 'Wolf of Wall Street' Story: I was one of the largest steroid dealers in U.S. history. I built a 7-figure black market empire, lost it all and went to prison, then used my expertise to build a fastest growing TRT/HRT clinics in the country. Here are some lessons I learned. - I Will Not Promote",
-      "source": "reddit",
-      "category": "",
-      "description": "My name is Ryan Root.   I have a very interesting memoir, a rags to riches story, in the vein of “Wolf Of Wall Street” or “War Dogs”. My story includes a journey from living destitute in a small city, | r/startups | score: 43 | comments: 44"
-    },
-    "102": {
-      "title": "I did everything the \"right way\" and I have zero to show for it. Is the silence phase normal or am I just delusional? (I will not promote)",
-      "source": "reddit",
-      "category": "",
-      "description": "I need to be honest somewhere, and this is the most anonymous place I have.\n\nI'm a CS student in Nepal. A few months ago I decided to build an AI startup. Solo. No cofounder. No network. No rich paren | r/startups | score: 37 | comments: 143"
-    },
-    "103": {
-      "title": "The real numbers behind running a 500 person destination conference - venue costs, tickets, and why there almost wasn't a year 2 [I will not promote]",
-      "source": "reddit",
-      "category": "",
-      "description": "In short, I run a SaaS community in Central and Eastern Europe. We did our first annual conference last year with 300 people at a resort in Šibenik, Croatia and it went well enough that we’re doing it | r/startups | score: 31 | comments: 13"
-    },
-    "104": {
-      "title": "I think i really am just the “idea guy” and it’s starting to get to me. Losing motivation -i will not quit - i will not promote",
-      "source": "reddit",
-      "category": "",
-      "description": "I have an idea… “it’s really good, yada yada yada”\n\nIt’s in the fintech space. I work at a bank in the fintech vertical.\n\nI do have a decent network for my age. Told some coworkers and the head of our | r/startups | score: 30 | comments: 71"
-    },
-    "105": {
-      "title": "How to begin distribution: seasoned founders give advice to early ones! [I will not promote]",
-      "source": "reddit",
-      "category": "",
-      "description": "Everyone has their own answer to this question. Those who have answered it, including myself, will always tell you focus on 1 maximum 2 channels and rinse them out of attention until you move on to th | r/startups | score: 29 | comments: 40"
-    },
-    "106": {
-      "title": "How to promote - I will not promote",
-      "source": "reddit",
-      "category": "",
-      "description": "Quite a bit a contradicting title, I know. But it is a serious question I have.\n\nI have started this project on the side, just as a backend project, but in the past few weeks I have been adding more f | r/startups | score: 27 | comments: 34"
     },
     "107": {
       "title": "deepseek-ai/DeepSeek-R1",
@@ -2261,13 +1683,13 @@
     "neighborhoods_intra": 15,
     "neighborhoods_cross": 10,
     "neighborhoods_total": 25,
-    "constellations_found": 62,
+    "constellations_found": 43,
     "constellations_by_type": {
-      "convergence": 21,
-      "absence": 25,
-      "chain": 4,
-      "triangulation": 5,
-      "spectrum": 7
+      "convergence": 16,
+      "absence": 17,
+      "chain": 3,
+      "spectrum": 5,
+      "triangulation": 2
     },
     "constellation_cache_hits": 0,
     "constellation_api_calls": 25,
