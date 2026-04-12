@@ -48,6 +48,7 @@ constellate run              # Run the full pipeline
   --output <path>            # Output JSON path (default: output.json)
 
 constellate ingest <file>    # Import ideas from JSON
+constellate scrape [source]  # Scrape ideas (all sources if none specified)
 constellate stats            # Show database statistics
 constellate clear-cache      # Clear all cached results
 ```
@@ -114,6 +115,34 @@ class MyEmbedder implements Embedder {
 - All Claude API calls are cached by neighborhood hash + prompt version
 - Re-running the same dataset is free after first run
 - Cost tracked per stage in pipeline output
+
+## Sources
+
+Constellate scrapes 11 sources out of the box:
+
+GitHub Trending, Hacker News, arXiv (CS.AI), Product Hunt, Y Combinator, Indie Hackers, BetaList, Dev.to, Reddit (r/SaaS + r/startups), Papers With Code, Hugging Face.
+
+```bash
+# Scrape all sources
+npx tsx cli/index.ts scrape
+
+# Scrape a specific source
+npx tsx cli/index.ts scrape github
+```
+
+## Weekly Pipeline
+
+Run the full scrape → pipeline → export flow:
+
+```bash
+ANTHROPIC_API_KEY=sk-... npx tsx scripts/weekly-run.ts
+```
+
+To generate a DB compatible with [constellate-landing](https://github.com/Harthor/constellate-landing):
+
+```bash
+npx tsx scripts/export-landing-db.ts [output-path]
+```
 
 ## Development
 

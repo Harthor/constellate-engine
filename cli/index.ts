@@ -4,6 +4,7 @@ import { writeFileSync } from 'fs';
 import { runPipeline, DEFAULT_CONFIG } from '../src/pipeline/index.js';
 import { getDb, bulkInsertIdeas, clearCache, closeDb } from '../src/db/database.js';
 import { createEmbedder } from '../src/embeddings/embedder.js';
+import { SCRAPERS, SOURCE_NAMES, scrapeAll } from '../src/sources/scrapers.js';
 
 const program = new Command();
 
@@ -76,6 +77,48 @@ program
     clearCache();
     console.log('Cache cleared.');
     closeDb();
+  });
+
+program
+  .command('scrape [source]')
+  .description('Scrape ideas from sources (all sources if none specified)')
+  .action(async (source?: string) => {
+    try {
+      if (source && !SCRAPERS[source]) {
+        console.error(`Unknown source: ${source}`);
+        console.error(`Available: ${SOURCE_NAMES.join(', ')}`);
+        process.exit(1);
+      }
+
+      if (source) {
+        console.log(`Scraping ${source}...`);
+        const ideas = await SCRAPERS[source]();
+        console.log(`  Fetched ${ideas.length} ideas`);
+        const count = bulkInsertIdeas(ideas);
+        console.log(`  Ingested ${count} new (${ideas.length - count} duplicates)`);
+      } else {
+        console.log(`Scraping all ${SOURCE_NAMES.length} sources...\n`);
+        const results = await scrapeAll();
+        let totalNew = 0;
+        let totalFetched = 0;
+        for (const r of results) {
+          if (r.error) {
+            console.log(`  [${r.source}] ERROR: ${r.error}`);
+            continue;
+          }
+          const count = bulkInsertIdeas(r.ideas);
+          totalNew += count;
+          totalFetched += r.ideas.length;
+          console.log(`  [${r.source}] ${r.ideas.length} fetched, ${count} new`);
+        }
+        console.log(`\nTotal: ${totalFetched} fetched, ${totalNew} new ideas ingested`);
+      }
+      closeDb();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`Error: ${msg}`);
+      process.exit(1);
+    }
   });
 
 program

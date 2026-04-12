@@ -23,3 +23,5 @@ export { createEmbedder } from './embeddings/embedder.js';
 export { TfIdfEmbedder } from './embeddings/tfidf.js';
 
 export { getDb, closeDb, createDb, bulkInsertIdeas, loadIdeas, clearCache } from './db/database.js';
+
+export { SCRAPERS, SOURCE_NAMES, scrapeAll } from './sources/scrapers.js';
