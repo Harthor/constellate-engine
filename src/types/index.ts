@@ -1,4 +1,6 @@
 // ─── Core domain types ──────────────────────────────────────────────
+// SYNC NOTE: A subset of these types is duplicated in constellate-web/lib/types.ts.
+// Update both files when changing Constellation, EmergentPattern, IdeaRef, or PipelineMetadata.
 
 export interface Idea {
   id: number;
