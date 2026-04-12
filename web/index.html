@@ -4,20 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Constellate — Pattern Visualizer</title>
+  <script src="https://unpkg.com/force-graph@1.47.3/dist/force-graph.min.js"></script>
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --border: #1e1e2e;
+      --bg: #0a0e1a;
+      --surface: rgba(10,14,26,0.85);
+      --border: rgba(255,255,255,0.08);
       --text: #e0e0e8;
-      --text-dim: #8888a0;
-      --accent: #6c63ff;
-      --accent-glow: rgba(108, 99, 255, 0.3);
-      --triangulation: #ff6b6b;
-      --spectrum: #ffd93d;
-      --chain: #6bcb77;
-      --convergence: #4d96ff;
-      --absence: #c084fc;
+      --text-dim: rgba(255,255,255,0.5);
+      --text-dimmer: rgba(255,255,255,0.3);
+      --chain: #FF6B6B;
+      --triangulation: #4ECDC4;
+      --convergence: #FFD166;
+      --absence: #A78BFA;
+      --spectrum: #95E1D3;
+      --accent: #8EDCE6;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,358 +27,632 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      overflow: hidden;
+      height: 100vh;
     }
 
-    header {
-      padding: 1.5rem 2rem;
+    /* Header */
+    #header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem;
+      background: rgba(10,14,26,0.82);
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      backdrop-filter: blur(16px);
     }
-
-    header h1 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    header h1 span { color: var(--accent); }
-
-    .meta {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .meta strong { color: var(--text); }
-
-    .controls {
-      padding: 1rem 2rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .controls button {
-      padding: 0.4rem 0.9rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 0.8rem;
+    #header .logo { font-weight: 700; font-size: 0.9rem; }
+    #header .center-text { font-size: 0.68rem; font-family: monospace; color: var(--text-dim); }
+    #header .tabs { display: flex; gap: 0.25rem; }
+    #header .tab {
+      padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+      background: transparent; border: 1px solid transparent; color: var(--text-dim);
       transition: all 0.15s;
     }
+    #header .tab:hover { color: var(--text); border-color: var(--border); }
+    #header .tab.active { background: rgba(142,220,230,0.15); color: var(--accent); border-color: rgba(142,220,230,0.25); }
 
-    .controls button:hover { border-color: var(--accent); }
-    .controls button.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
+    /* Views */
+    #graph-view { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; }
+    #feed-view { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 1.5rem; display: none; }
+
+    /* Left panel */
+    #left-panel {
+      position: fixed; top: 72px; left: 16px; bottom: 80px; width: 300px; z-index: 40;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      backdrop-filter: blur(16px); overflow-y: auto; padding: 1rem;
     }
-
-    .upload-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 1rem;
+    .panel-label { font-size: 0.65rem; font-family: monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 0.5rem; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .filter-chip {
+      display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.7rem; color: rgba(255,255,255,0.7);
     }
-
-    .upload-zone p { color: var(--text-dim); font-size: 0.95rem; }
-
-    .upload-zone label {
-      padding: 0.7rem 1.5rem;
-      border-radius: 8px;
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 500;
-      transition: opacity 0.15s;
+    .filter-chip .dot { width: 10px; height: 10px; border-radius: 2px; border: 1px solid; }
+    .filter-chip.off .dot { background: transparent !important; }
+    .filter-chip.off { opacity: 0.4; }
+    .score-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .score-row span { font-size: 0.7rem; font-family: monospace; color: var(--text-dim); }
+    .score-row input { flex: 1; accent-color: rgba(255,255,255,0.6); }
+    #search-input {
+      width: 100%; padding: 0.4rem 0.6rem; font-size: 0.7rem; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; outline: none; margin-bottom: 1rem;
     }
+    #search-input:focus { border-color: rgba(255,255,255,0.25); }
+    .hub-item {
+      padding: 0.4rem 0.5rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.2rem;
+      font-size: 0.7rem; transition: background 0.15s;
+    }
+    .hub-item:hover { background: rgba(255,255,255,0.06); }
+    .hub-item.active { background: rgba(255,255,255,0.1); }
+    .hub-title { color: rgba(255,255,255,0.8); line-height: 1.3; }
+    .hub-meta { color: var(--text-dimmer); font-size: 0.65rem; margin-top: 0.15rem; }
 
-    .upload-zone label:hover { opacity: 0.85; }
-    .upload-zone input { display: none; }
-
-    main {
+    /* Right panel */
+    #right-panel {
+      position: fixed; top: 72px; right: 16px; bottom: 80px; width: 380px; z-index: 40;
+      background: rgba(10,14,26,0.9); border: 1px solid var(--border); border-radius: 12px;
+      backdrop-filter: blur(16px); overflow-y: auto; padding: 1.25rem;
       display: none;
-      padding: 1.5rem 2rem;
+    }
+    #right-panel .close-btn {
+      position: absolute; top: 12px; right: 12px; background: none; border: none;
+      color: var(--text-dimmer); font-size: 1rem; cursor: pointer;
+    }
+    #right-panel .close-btn:hover { color: var(--text); }
+    #right-panel .type-badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
+      font-size: 0.7rem; font-family: monospace; font-weight: 600; color: #0a0e1a;
+    }
+    #right-panel .detail-score { font-size: 0.75rem; font-family: monospace; color: var(--text-dim); }
+    #right-panel .type-desc { font-size: 0.7rem; color: var(--text-dim); font-style: italic; line-height: 1.4; margin: 0.5rem 0; }
+    #right-panel .detail-title { font-size: 1rem; font-weight: 600; line-height: 1.3; margin: 0.5rem 0; }
+    #right-panel .detail-explanation { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.55; }
+    .idea-link {
+      display: flex; align-items: start; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 8px;
+      text-decoration: none; color: rgba(255,255,255,0.8); font-size: 0.75rem; transition: background 0.15s;
+    }
+    .idea-link:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .idea-link .src-emoji { flex-shrink: 0; font-size: 0.85rem; }
+    .idea-link .idea-src { font-size: 0.6rem; color: var(--text-dimmer); }
+
+    /* Legend */
+    #legend {
+      position: fixed; top: 72px; z-index: 30; display: flex; gap: 0.75rem;
+      padding: 0.5rem 1rem; border-radius: 8px;
+      background: rgba(10,14,26,0.8); border: 1px solid var(--border);
+      transition: right 0.2s;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.7rem; color: var(--text-dim); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Bottom stats */
+    #bottom-stats {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 30;
+      padding: 0.5rem 1.5rem; border-radius: 999px; font-size: 0.7rem; font-family: monospace;
+      color: var(--text-dim); text-align: center;
+      background: rgba(10,14,26,0.8); border: 1px solid var(--border);
     }
 
-    main.visible { display: block; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 1rem;
+    /* Tooltip */
+    #tooltip {
+      position: fixed; z-index: 60; pointer-events: none; display: none;
+      padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.7rem; font-family: monospace;
+      background: rgba(10,14,26,0.92); border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px); color: #fff; max-width: 300px;
     }
+    #tooltip .tt-title { font-weight: 600; margin-bottom: 0.25rem; }
+    #tooltip .tt-meta { display: flex; gap: 0.75rem; color: var(--text-dim); }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.2rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    /* Feed view */
+    .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1rem; max-width: 1400px; margin: 0 auto; }
+    .feed-card {
+      background: rgba(18,18,26,0.8); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.2rem; transition: border-color 0.2s;
     }
+    .feed-card:hover { border-color: rgba(142,220,230,0.3); }
+    .feed-card .card-header { display: flex; align-items: start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .feed-card .card-title { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
+    .feed-card .card-badge { font-size: 0.6rem; padding: 0.15rem 0.4rem; border-radius: 3px; font-weight: 600; text-transform: uppercase; color: #0a0e1a; white-space: nowrap; }
+    .feed-card .card-score { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.4rem; }
+    .feed-card .card-score strong { color: var(--accent); }
+    .feed-card .card-text { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 0.6rem; }
+    .feed-card .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .feed-card .chip { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 3px; background: rgba(142,220,230,0.1); border: 1px solid rgba(142,220,230,0.2); color: var(--text); }
+    .feed-section-title { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); max-width: 1400px; margin-left: auto; margin-right: auto; }
+    .pattern-card { background: rgba(18,18,26,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 0.6rem; max-width: 1400px; margin-left: auto; margin-right: auto; }
+    .pattern-card .pt-title { font-size: 0.9rem; font-weight: 600; color: var(--accent); }
+    .pattern-card .pt-text { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; margin-top: 0.4rem; }
 
-    .card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-
-    .badge {
-      font-size: 0.65rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-weight: 600;
-      text-transform: uppercase;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .badge.triangulation { background: var(--triangulation); color: #000; }
-    .badge.spectrum { background: var(--spectrum); color: #000; }
-    .badge.chain { background: var(--chain); color: #000; }
-    .badge.convergence { background: var(--convergence); color: #000; }
-    .badge.absence { background: var(--absence); color: #000; }
-
-    .score {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      margin-bottom: 0.5rem;
-    }
-
-    .score strong { color: var(--accent); font-size: 0.95rem; }
-
-    .explanation {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.55;
-      margin-bottom: 0.8rem;
-    }
-
-    .ideas-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .idea-chip {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(108, 99, 255, 0.1);
-      border: 1px solid rgba(108, 99, 255, 0.2);
-      color: var(--text);
-    }
-
-    /* Patterns section */
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 2rem 0 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .pattern-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.2rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .pattern-card .card-title { color: var(--accent); }
-
-    .pattern-card .explanation {
-      margin-bottom: 0;
-    }
-
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      gap: 2rem;
-      padding: 1rem 2rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      font-size: 0.8rem;
-    }
-
-    .stat-item { display: flex; flex-direction: column; gap: 0.15rem; }
-    .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
-    .stat-label { color: var(--text-dim); }
+    /* Loading */
+    #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 100; }
+    #loading span { color: var(--text-dim); font-size: 0.85rem; font-family: monospace; }
   </style>
 </head>
 <body>
 
-<header>
-  <h1><span>*</span> Constellate</h1>
-  <div class="meta" id="header-meta"></div>
-</header>
+<div id="loading"><span>Loading constellation data...</span></div>
 
-<div class="upload-zone" id="upload-zone">
-  <p>Load a pipeline output JSON to visualize results</p>
-  <label for="file-input">Choose output.json</label>
-  <input type="file" id="file-input" accept=".json">
-  <p style="font-size: 0.8rem; color: var(--text-dim);">
-    or drag & drop anywhere on this page
-  </p>
+<div id="header">
+  <span class="logo">Constellate</span>
+  <span class="center-text" id="center-text"></span>
+  <button id="help-btn" style="background:none;border:none;color:var(--text-dim);font-size:0.75rem;cursor:pointer;font-family:monospace;display:flex;align-items:center;gap:0.35rem;padding:0.3rem 0.5rem;border-radius:6px;transition:all 0.15s" onmouseover="this.style.color='var(--accent)';this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">&#9432; What am I looking at?</button>
+  <div class="tabs">
+    <div class="tab active" data-view="graph">Map</div>
+    <div class="tab" data-view="feed">Feed</div>
+  </div>
 </div>
 
-<div class="stats-bar" id="stats-bar" style="display: none;"></div>
+<div id="graph-view"></div>
+<div id="feed-view"></div>
 
-<div class="controls" id="controls" style="display: none;">
-  <button class="active" data-filter="all">All</button>
-  <button data-filter="triangulation">Triangulation</button>
-  <button data-filter="spectrum">Spectrum</button>
-  <button data-filter="chain">Chain</button>
-  <button data-filter="convergence">Convergence</button>
-  <button data-filter="absence">Absence</button>
+<div id="left-panel">
+  <div class="panel-label">Filters</div>
+  <div class="filter-row" id="type-filters"></div>
+  <div class="score-row">
+    <span id="score-label">Score &ge; 6</span>
+    <input type="range" min="6" max="10" value="6" id="score-slider">
+  </div>
+  <input type="text" id="search-input" placeholder="Search by title...">
+  <div class="panel-label">Hub Ideas <span style="color:var(--text-dimmer)">(in 3+ constellations)</span></div>
+  <div id="hub-list"></div>
 </div>
 
-<main id="main">
-  <div class="grid" id="constellations-grid"></div>
-  <h2 class="section-title" id="patterns-title" style="display: none;">Emergent Patterns</h2>
-  <div id="patterns-list"></div>
-</main>
+<div id="right-panel">
+  <button class="close-btn" id="close-detail">&times;</button>
+  <div id="detail-content"></div>
+</div>
+
+<div id="legend"></div>
+<div id="bottom-stats" id="bottom-stats"></div>
+<div id="tooltip"><div class="tt-title"></div><div class="tt-meta"></div></div>
+
+<!-- Help modal -->
+<div id="help-modal" style="display:none;position:fixed;inset:0;z-index:60;align-items:center;justify-content:center;padding:1rem">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)" onclick="document.getElementById('help-modal').style.display='none'"></div>
+  <div style="position:relative;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;border-radius:12px;padding:1.75rem;background:rgba(10,14,26,0.95);border:1px solid rgba(255,255,255,0.1)" onclick="event.stopPropagation()">
+    <button onclick="document.getElementById('help-modal').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text-dimmer);font-size:1.1rem;cursor:pointer">&times;</button>
+    <h3 style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:0.5rem">The 5 types of constellations</h3>
+    <p style="color:var(--text-dim);font-size:0.8rem;line-height:1.5;margin-bottom:1.5rem">Constellate groups ideas into patterns of 3-6 items that reveal non-obvious connections. Each constellation falls into one of five categories:</p>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem">
+      <!-- Chain -->
+      <div style="display:flex;gap:1rem;align-items:start">
+        <svg width="64" height="40" viewBox="0 0 64 40" fill="none" style="flex-shrink:0;margin-top:4px">
+          <circle cx="8" cy="20" r="4" fill="#FF6B6B"/><line x1="12" y1="20" x2="22" y2="20" stroke="#FF6B6B" stroke-width="1.5"/>
+          <circle cx="26" cy="20" r="4" fill="#FF6B6B"/><line x1="30" y1="20" x2="40" y2="20" stroke="#FF6B6B" stroke-width="1.5"/>
+          <circle cx="44" cy="20" r="4" fill="#FF6B6B"/><line x1="48" y1="20" x2="52" y2="20" stroke="#FF6B6B" stroke-width="1.5"/>
+          <circle cx="56" cy="20" r="3" fill="none" stroke="#FF6B6B" stroke-width="1" stroke-dasharray="2 2"/>
+          <polygon points="21,17 25,20 21,23" fill="#FF6B6B"/><polygon points="39,17 43,20 39,23" fill="#FF6B6B"/>
+        </svg>
+        <div>
+          <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-family:monospace;font-weight:600;background:#FF6B6B;color:#0a0e1a;margin-bottom:0.35rem">Chain</span>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;line-height:1.5;margin-bottom:0.2rem">Ideas that form a logical or causal progression nobody designed on purpose. Each step enables or extends the next.</p>
+          <p style="color:var(--text-dimmer);font-size:0.7rem;font-style:italic;line-height:1.4">Example: Proprietary product → open-source clones → cheaper alternatives → users migrating.</p>
+        </div>
+      </div>
+      <!-- Triangulation -->
+      <div style="display:flex;gap:1rem;align-items:start">
+        <svg width="64" height="40" viewBox="0 0 64 40" fill="none" style="flex-shrink:0;margin-top:4px">
+          <line x1="32" y1="6" x2="10" y2="34" stroke="#4ECDC4" stroke-width="1" opacity="0.5"/>
+          <line x1="32" y1="6" x2="54" y2="34" stroke="#4ECDC4" stroke-width="1" opacity="0.5"/>
+          <line x1="10" y1="34" x2="54" y2="34" stroke="#4ECDC4" stroke-width="1" opacity="0.5"/>
+          <circle cx="32" cy="6" r="4" fill="#4ECDC4"/><circle cx="10" cy="34" r="4" fill="#4ECDC4"/>
+          <circle cx="54" cy="34" r="4" fill="#4ECDC4"/>
+          <circle cx="32" cy="24" r="5" fill="#4ECDC4" opacity="0.15"/><circle cx="32" cy="24" r="2" fill="#4ECDC4" opacity="0.4"/>
+        </svg>
+        <div>
+          <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-family:monospace;font-weight:600;background:#4ECDC4;color:#0a0e1a;margin-bottom:0.35rem">Triangulation</span>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;line-height:1.5;margin-bottom:0.2rem">Three ideas that illuminate the same deep phenomenon from different angles. No single one names it; together they do.</p>
+          <p style="color:var(--text-dimmer);font-size:0.7rem;font-style:italic;line-height:1.4">Example: A post refusing apps + a data privacy scandal + AI agent sandboxes → the silent collapse of user agency.</p>
+        </div>
+      </div>
+      <!-- Convergence -->
+      <div style="display:flex;gap:1rem;align-items:start">
+        <svg width="64" height="40" viewBox="0 0 64 40" fill="none" style="flex-shrink:0;margin-top:4px">
+          <line x1="10" y1="8" x2="27" y2="17" stroke="#FFD166" stroke-width="1.5"/>
+          <line x1="54" y1="8" x2="37" y2="17" stroke="#FFD166" stroke-width="1.5"/>
+          <line x1="10" y1="34" x2="27" y2="25" stroke="#FFD166" stroke-width="1.5"/>
+          <line x1="54" y1="34" x2="37" y2="25" stroke="#FFD166" stroke-width="1.5"/>
+          <circle cx="10" cy="8" r="3.5" fill="#FFD166"/><circle cx="54" cy="8" r="3.5" fill="#FFD166"/>
+          <circle cx="10" cy="34" r="3.5" fill="#FFD166"/><circle cx="54" cy="34" r="3.5" fill="#FFD166"/>
+          <circle cx="32" cy="20" r="6" fill="#FFD166" opacity="0.2"/><circle cx="32" cy="20" r="3" fill="#FFD166"/>
+        </svg>
+        <div>
+          <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-family:monospace;font-weight:600;background:#FFD166;color:#0a0e1a;margin-bottom:0.35rem">Convergence</span>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;line-height:1.5;margin-bottom:0.2rem">Ideas from topically distant domains that unknowingly point to the same underlying problem or structural solution.</p>
+          <p style="color:var(--text-dimmer);font-size:0.7rem;font-style:italic;line-height:1.4">Example: A distributed systems paper + an organizational resilience article → both describing fault tolerance under stress.</p>
+        </div>
+      </div>
+      <!-- Absence -->
+      <div style="display:flex;gap:1rem;align-items:start">
+        <svg width="64" height="40" viewBox="0 0 64 40" fill="none" style="flex-shrink:0;margin-top:4px">
+          <circle cx="12" cy="14" r="4" fill="#A78BFA"/><circle cx="52" cy="14" r="4" fill="#A78BFA"/>
+          <circle cx="12" cy="30" r="4" fill="#A78BFA"/><circle cx="52" cy="30" r="4" fill="#A78BFA"/>
+          <line x1="12" y1="14" x2="52" y2="14" stroke="#A78BFA" stroke-width="1" opacity="0.3"/>
+          <line x1="12" y1="14" x2="12" y2="30" stroke="#A78BFA" stroke-width="1" opacity="0.3"/>
+          <line x1="12" y1="30" x2="52" y2="30" stroke="#A78BFA" stroke-width="1" opacity="0.3"/>
+          <line x1="52" y1="14" x2="52" y2="30" stroke="#A78BFA" stroke-width="1" opacity="0.3"/>
+          <circle cx="32" cy="22" r="6" stroke="#A78BFA" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>
+          <text x="32" y="26" text-anchor="middle" fill="#A78BFA" font-size="10" font-weight="bold">?</text>
+        </svg>
+        <div>
+          <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-family:monospace;font-weight:600;background:#A78BFA;color:#0a0e1a;margin-bottom:0.35rem">Absence</span>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;line-height:1.5;margin-bottom:0.2rem">A logical gap. Given what's in a cluster, this idea should be there but isn't. Constellate detects what's missing.</p>
+          <p style="color:var(--text-dimmer);font-size:0.7rem;font-style:italic;line-height:1.4">Example: AI coding agents + audit tools + regulation concerns, but no standardized logging for agent decisions.</p>
+        </div>
+      </div>
+      <!-- Spectrum -->
+      <div style="display:flex;gap:1rem;align-items:start">
+        <svg width="64" height="40" viewBox="0 0 64 40" fill="none" style="flex-shrink:0;margin-top:4px">
+          <line x1="6" y1="20" x2="58" y2="20" stroke="#95E1D3" stroke-width="1" opacity="0.3"/>
+          <circle cx="8" cy="20" r="4" fill="#95E1D3" opacity="0.3"/><circle cx="22" cy="20" r="4" fill="#95E1D3" opacity="0.5"/>
+          <circle cx="36" cy="20" r="4" fill="#95E1D3" opacity="0.7"/><circle cx="50" cy="20" r="4" fill="#95E1D3"/>
+          <path d="M3,20 L8,17 L8,23 Z" fill="#95E1D3" opacity="0.3"/><path d="M61,20 L56,17 L56,23 Z" fill="#95E1D3"/>
+        </svg>
+        <div>
+          <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-family:monospace;font-weight:600;background:#95E1D3;color:#0a0e1a;margin-bottom:0.35rem">Spectrum</span>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;line-height:1.5;margin-bottom:0.2rem">Four to five ideas that represent different positions on the same axis of debate or design. The insight is the axis itself.</p>
+          <p style="color:var(--text-dimmer);font-size:0.7rem;font-style:italic;line-height:1.4">Example: From fully autonomous AI to fully supervised AI, with intermediate positions along the control spectrum.</p>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="document.getElementById('help-modal').style.display='none'" style="margin-top:1.25rem;width:100%;padding:0.5rem;border-radius:8px;font-size:0.8rem;font-weight:600;background:rgba(142,220,230,0.15);color:#8EDCE6;border:1px solid rgba(142,220,230,0.25);cursor:pointer">Got it</button>
+  </div>
+</div>
 
 <script>
-  let data = null;
-  let currentFilter = 'all';
+const TYPE_COLORS = { chain:'#FF6B6B', triangulation:'#4ECDC4', convergence:'#FFD166', absence:'#A78BFA', spectrum:'#95E1D3' };
+const TYPE_LABELS = { chain:'Chain', triangulation:'Triangulation', convergence:'Convergence', absence:'Absence', spectrum:'Spectrum' };
+const TYPE_SHORT = {
+  chain:'Ideas forming a logical progression nobody designed on purpose.',
+  triangulation:'Three ideas illuminating the same phenomenon from different angles.',
+  convergence:'Distant domains unknowingly pointing to the same problem or solution.',
+  absence:'A logical gap \u2014 what should be here but isn\u2019t.',
+  spectrum:'Ideas representing different positions on the same axis of debate.',
+};
+const SRC_EMOJI = { github:'\uD83D\uDC19', hn:'\uD83D\uDD36', arxiv:'\uD83D\uDCC4', producthunt:'\uD83D\uDE80', yc:'\uD83D\uDFE0', reddit:'\uD83E\uDD16', devto:'\u270D\uFE0F', huggingface:'\uD83E\uDD17', betalist:'\uD83C\uDF1F', indiehackers:'\uD83D\uDCA1', paperswithcode:'\uD83D\uDCDA' };
 
-  // File input
-  document.getElementById('file-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) loadFile(file);
-  });
+let data = null;
+let graph = null;
+let activeTypes = new Set(Object.keys(TYPE_COLORS));
+let minScore = 6;
+let searchText = '';
+let selectedNode = null;
+let highlightedHub = null;
+let hoveredNode = null;
 
-  // Drag & drop
-  document.addEventListener('dragover', (e) => e.preventDefault());
-  document.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) loadFile(file);
-  });
+// ─── Load data ─────────────────────────────────────────────────
+fetch('sample-output.json')
+  .then(r => r.json())
+  .then(d => { data = d; init(); })
+  .catch(() => { document.getElementById('loading').innerHTML = '<span>Failed to load data. Serve this directory via HTTP.</span>'; });
 
-  // Filter buttons
-  document.getElementById('controls').addEventListener('click', (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    currentFilter = e.target.dataset.filter;
-    document.querySelectorAll('.controls button').forEach((b) => b.classList.remove('active'));
-    e.target.classList.add('active');
-    renderConstellations();
-  });
+function init() {
+  document.getElementById('loading').style.display = 'none';
+  buildGraphData();
+  renderFilters();
+  renderLegend();
+  renderHubs();
+  updateStats();
+  initGraph();
+  renderFeed();
+}
 
-  function loadFile(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        data = JSON.parse(e.target.result);
-        renderAll();
-      } catch (err) {
-        alert('Invalid JSON file');
+// ─── Graph data ────────────────────────────────────────────────
+let graphNodes = [], graphLinks = [];
+
+function buildGraphData() {
+  // Nodes = constellations
+  graphNodes = data.constellations.map((c, i) => ({
+    id: 'c_' + i,
+    title: c.title,
+    type: c.constellation_type,
+    score: c.score,
+    idea_ids: c.idea_ids,
+    explanation: c.explanation,
+    _raw: c,
+  }));
+
+  // Edges = shared ideas between constellations
+  graphLinks = [];
+  for (let i = 0; i < graphNodes.length; i++) {
+    const setA = new Set(graphNodes[i].idea_ids);
+    for (let j = i + 1; j < graphNodes.length; j++) {
+      const shared = graphNodes[j].idea_ids.filter(id => setA.has(id));
+      if (shared.length > 0) {
+        graphLinks.push({ source: graphNodes[i].id, target: graphNodes[j].id, weight: shared.length });
       }
-    };
-    reader.readAsText(file);
-  }
-
-  function renderAll() {
-    document.getElementById('upload-zone').style.display = 'none';
-    document.getElementById('stats-bar').style.display = 'flex';
-    document.getElementById('controls').style.display = 'flex';
-    document.getElementById('main').classList.add('visible');
-
-    // Stats
-    const m = data.metadata;
-    document.getElementById('stats-bar').innerHTML = `
-      <div class="stat-item"><span class="stat-value">${m.total_ideas}</span><span class="stat-label">Ideas</span></div>
-      <div class="stat-item"><span class="stat-value">${m.neighborhoods_total}</span><span class="stat-label">Neighborhoods</span></div>
-      <div class="stat-item"><span class="stat-value">${m.constellations_found}</span><span class="stat-label">Constellations</span></div>
-      <div class="stat-item"><span class="stat-value">${data.patterns.length}</span><span class="stat-label">Patterns</span></div>
-      <div class="stat-item"><span class="stat-value">$${m.estimated_cost_usd.toFixed(4)}</span><span class="stat-label">Cost</span></div>
-      <div class="stat-item"><span class="stat-value">${(m.elapsed_ms / 1000).toFixed(1)}s</span><span class="stat-label">Time</span></div>
-    `;
-
-    // Header meta
-    document.getElementById('header-meta').innerHTML = `
-      <span>Cache: <strong>${m.constellation_cache_hits}</strong> hits, <strong>${m.constellation_api_calls}</strong> API calls</span>
-    `;
-
-    renderConstellations();
-    renderPatterns();
-  }
-
-  function renderConstellations() {
-    const grid = document.getElementById('constellations-grid');
-    const sorted = [...data.constellations].sort((a, b) => b.score - a.score);
-    const filtered = currentFilter === 'all'
-      ? sorted
-      : sorted.filter((c) => c.constellation_type === currentFilter);
-
-    grid.innerHTML = filtered.map((c) => `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">${esc(c.title)}</div>
-          <span class="badge ${c.constellation_type}">${c.constellation_type}</span>
-        </div>
-        <div class="score">Score: <strong>${c.score}</strong>/10</div>
-        <div class="explanation">${esc(c.explanation)}</div>
-        <div class="ideas-list">
-          ${c.idea_ids.map((id) => {
-            const idea = data.ideas[id];
-            return `<span class="idea-chip" title="${esc(idea?.description || '')}">${esc(idea?.title || 'ID:' + id)}</span>`;
-          }).join('')}
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function renderPatterns() {
-    const list = document.getElementById('patterns-list');
-    const title = document.getElementById('patterns-title');
-
-    if (data.patterns.length === 0) {
-      title.style.display = 'none';
-      list.innerHTML = '';
-      return;
     }
+  }
+}
 
-    title.style.display = 'block';
-    list.innerHTML = data.patterns.map((p) => `
-      <div class="pattern-card">
-        <div class="card-title">${esc(p.pattern_title)}</div>
-        <div class="explanation" style="margin-top: 0.5rem;">${esc(p.pattern_description)}</div>
+function getFilteredGraph() {
+  const sl = searchText.toLowerCase();
+  const nodes = graphNodes.filter(n =>
+    activeTypes.has(n.type) && n.score >= minScore &&
+    (searchText === '' || n.title.toLowerCase().includes(sl))
+  );
+  const ids = new Set(nodes.map(n => n.id));
+  const links = graphLinks.filter(l => ids.has(l.source?.id || l.source) && ids.has(l.target?.id || l.target));
+  return { nodes: nodes.map(n => ({...n})), links: links.map(l => ({...l})) };
+}
+
+// ─── Hub ideas ─────────────────────────────────────────────────
+function getHubIdeas() {
+  const map = new Map();
+  graphNodes.forEach(n => {
+    n.idea_ids.forEach(id => {
+      if (!map.has(id)) map.set(id, []);
+      map.get(id).push(n.id);
+    });
+  });
+  return [...map.entries()]
+    .filter(([,c]) => c.length >= 3)
+    .sort((a,b) => b[1].length - a[1].length)
+    .slice(0, 15)
+    .map(([id, cIds]) => {
+      const idea = data.ideas[id];
+      return { id, title: idea?.title || 'ID:'+id, source: idea?.source || '?', constellations: cIds, count: cIds.length };
+    });
+}
+
+// ─── Init graph ────────────────────────────────────────────────
+function initGraph() {
+  const container = document.getElementById('graph-view');
+  graph = ForceGraph()(container)
+    .graphData(getFilteredGraph())
+    .backgroundColor('#0a0e1a')
+    .nodeId('id')
+    .nodeCanvasObject((node, ctx, scale) => {
+      const color = TYPE_COLORS[node.type] || '#888';
+      const r = 6 + (node.score - 6) * 2;
+      const dimmed = highlightedHub && !highlightedHub.constellations.includes(node.id);
+      ctx.globalAlpha = dimmed ? 0.12 : 1;
+
+      if (node.score >= 9) {
+        ctx.beginPath(); ctx.arc(node.x, node.y, r + 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+
+      const isHovered = hoveredNode?.id === node.id;
+      if ((node.score >= 9 || isHovered) && scale > 0.4) {
+        const label = node.title.length > 35 ? node.title.slice(0,35)+'...' : node.title;
+        const fs = Math.max(3.5, 11 / scale);
+        ctx.font = fs + 'px Inter, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.strokeStyle = 'rgba(10,14,26,0.8)'; ctx.lineWidth = 3/scale; ctx.lineJoin = 'round';
+        ctx.strokeText(label, node.x, node.y + r + 2);
+        ctx.fillStyle = dimmed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.7)';
+        ctx.fillText(label, node.x, node.y + r + 2);
+      }
+      ctx.globalAlpha = 1;
+    })
+    .nodePointerAreaPaint((node, color, ctx) => {
+      const r = 6 + (node.score - 6) * 2;
+      ctx.beginPath(); ctx.arc(node.x, node.y, r + 4, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+    })
+    .linkCanvasObject((link, ctx) => {
+      const src = link.source, tgt = link.target;
+      if (typeof src === 'string') return;
+      const w = link.weight;
+      const opacity = Math.min(0.2 + (w-1)*0.2, 0.6);
+      const width = Math.min(1 + (w-1)*0.8, 3);
+      const dimmed = highlightedHub && (!highlightedHub.constellations.includes(src.id) || !highlightedHub.constellations.includes(tgt.id));
+      ctx.beginPath(); ctx.moveTo(src.x, src.y); ctx.lineTo(tgt.x, tgt.y);
+      ctx.strokeStyle = dimmed ? 'rgba(142,220,230,0.04)' : `rgba(142,220,230,${opacity})`;
+      ctx.lineWidth = width; ctx.stroke();
+    })
+    .onNodeHover(node => {
+      hoveredNode = node;
+      const tt = document.getElementById('tooltip');
+      if (node) {
+        tt.style.display = 'block';
+        tt.querySelector('.tt-title').textContent = node.title;
+        tt.querySelector('.tt-meta').innerHTML = `<span style="color:${TYPE_COLORS[node.type]}">${TYPE_LABELS[node.type]}</span><span>Score ${node.score}</span><span>${node.idea_ids.length} ideas</span>`;
+      } else {
+        tt.style.display = 'none';
+      }
+      container.style.cursor = node ? 'pointer' : 'default';
+    })
+    .onNodeClick(node => { selectedNode = node; highlightedHub = null; showDetail(node); })
+    .onBackgroundClick(() => { selectedNode = null; highlightedHub = null; hideDetail(); graph.nodeColor(graph.nodeColor()); })
+    .cooldownTicks(100)
+    .width(window.innerWidth)
+    .height(window.innerHeight - 56);
+
+  window.addEventListener('resize', () => {
+    graph.width(window.innerWidth).height(window.innerHeight - 56);
+  });
+
+  // Track mouse for tooltip
+  container.addEventListener('mousemove', e => {
+    const tt = document.getElementById('tooltip');
+    tt.style.left = (e.clientX + 14) + 'px';
+    tt.style.top = (e.clientY - 10) + 'px';
+  });
+}
+
+function refreshGraph() {
+  if (graph) graph.graphData(getFilteredGraph());
+  updateStats();
+}
+
+// ─── Filters ───────────────────────────────────────────────────
+function renderFilters() {
+  const el = document.getElementById('type-filters');
+  el.innerHTML = Object.entries(TYPE_COLORS).map(([type, color]) =>
+    `<div class="filter-chip${activeTypes.has(type)?'':' off'}" data-type="${type}">
+      <span class="dot" style="background:${activeTypes.has(type)?color:'transparent'};border-color:${color}"></span>
+      <span style="color:${activeTypes.has(type)?color:''}">${TYPE_LABELS[type]}</span>
+    </div>`
+  ).join('');
+
+  el.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.dataset.type;
+      if (activeTypes.has(t)) activeTypes.delete(t); else activeTypes.add(t);
+      renderFilters(); refreshGraph();
+    });
+  });
+
+  document.getElementById('score-slider').oninput = e => {
+    minScore = +e.target.value;
+    document.getElementById('score-label').textContent = `Score \u2265 ${minScore}`;
+    refreshGraph();
+  };
+
+  document.getElementById('search-input').oninput = e => {
+    searchText = e.target.value;
+    refreshGraph();
+  };
+}
+
+function renderLegend() {
+  const el = document.getElementById('legend');
+  el.style.right = '1rem';
+  el.innerHTML = Object.entries(TYPE_COLORS).map(([t,c]) =>
+    `<div class="legend-item"><span class="legend-dot" style="background:${c}"></span>${TYPE_LABELS[t]}</div>`
+  ).join('');
+}
+
+function renderHubs() {
+  const hubs = getHubIdeas();
+  const el = document.getElementById('hub-list');
+  el.innerHTML = hubs.map(h =>
+    `<div class="hub-item" data-id="${h.id}">
+      <div class="hub-title">${SRC_EMOJI[h.source]||'\uD83D\uDCCC'} ${esc(h.title.length > 50 ? h.title.slice(0,50)+'...' : h.title)}</div>
+      <div class="hub-meta">${h.source} \u00b7 in ${h.count} constellations</div>
+    </div>`
+  ).join('');
+
+  el.querySelectorAll('.hub-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = +item.dataset.id;
+      const hub = getHubIdeas().find(h => h.id === id);
+      if (highlightedHub?.id === id) { highlightedHub = null; } else { highlightedHub = hub; }
+      el.querySelectorAll('.hub-item').forEach(i => i.classList.remove('active'));
+      if (highlightedHub) item.classList.add('active');
+      selectedNode = null; hideDetail();
+      graph.nodeColor(graph.nodeColor()); // force re-render
+    });
+  });
+}
+
+function updateStats() {
+  const fg = getFilteredGraph();
+  const hubs = getHubIdeas();
+  document.getElementById('bottom-stats').textContent =
+    `${fg.nodes.length} constellations \u00b7 ${Object.keys(TYPE_COLORS).length} types \u00b7 ${fg.links.length} edges \u00b7 ${hubs.length} hub ideas`;
+  document.getElementById('center-text').textContent =
+    `${fg.nodes.length} constellations from ${data.metadata.total_ideas} ideas \u00b7 ${Object.keys(TYPE_COLORS).length} types \u00b7 Click any node to explore`;
+}
+
+// ─── Detail panel ──────────────────────────────────────────────
+function showDetail(node) {
+  const panel = document.getElementById('right-panel');
+  const legend = document.getElementById('legend');
+  panel.style.display = 'block';
+  legend.style.right = '26rem';
+
+  const color = TYPE_COLORS[node.type] || '#888';
+  let html = `
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
+      <span class="type-badge" style="background:${color}">${TYPE_LABELS[node.type]}</span>
+      <span class="detail-score">Score ${node.score}</span>
+    </div>
+    <div class="type-desc">${TYPE_SHORT[node.type]}</div>
+    <div class="detail-title">${esc(node.title)}</div>
+    <div class="detail-explanation">${esc(node.explanation)}</div>
+    <div style="margin-top:1rem">
+      <div class="panel-label">Ideas (${node.idea_ids.length})</div>`;
+
+  for (const id of node.idea_ids) {
+    const idea = data.ideas[id];
+    if (!idea) continue;
+    const emoji = SRC_EMOJI[idea.source] || '\uD83D\uDCCC';
+    const isHub = getHubIdeas().some(h => h.id === id);
+    html += `<div class="idea-link">
+      <span class="src-emoji">${emoji}</span>
+      <div>
+        <div>${esc(idea.title)}${isHub ? ' <span style="color:#facc15" title="Hub idea">&#11088;</span>' : ''}</div>
+        <div class="idea-src">${idea.source || ''}</div>
       </div>
-    `).join('');
+    </div>`;
   }
+  html += '</div>';
+  document.getElementById('detail-content').innerHTML = html;
+}
 
-  function esc(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+function hideDetail() {
+  document.getElementById('right-panel').style.display = 'none';
+  document.getElementById('legend').style.right = '1rem';
+}
+
+document.getElementById('close-detail').addEventListener('click', () => {
+  selectedNode = null; hideDetail();
+});
+
+document.getElementById('help-btn').addEventListener('click', () => {
+  document.getElementById('help-modal').style.display = 'flex';
+});
+
+// ─── View switching ────────────────────────────────────────────
+document.querySelectorAll('#header .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#header .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const view = tab.dataset.view;
+    document.getElementById('graph-view').style.display = view === 'graph' ? 'block' : 'none';
+    document.getElementById('feed-view').style.display = view === 'feed' ? 'block' : 'none';
+    document.getElementById('left-panel').style.display = view === 'graph' ? 'block' : 'none';
+    document.getElementById('right-panel').style.display = view === 'graph' && selectedNode ? 'block' : 'none';
+    document.getElementById('legend').style.display = view === 'graph' ? 'flex' : 'none';
+    document.getElementById('bottom-stats').style.display = view === 'graph' ? 'block' : 'none';
+    if (view === 'graph' && graph) {
+      graph.width(window.innerWidth).height(window.innerHeight - 56);
+    }
+  });
+});
+
+// ─── Feed view ─────────────────────────────────────────────────
+function renderFeed() {
+  const el = document.getElementById('feed-view');
+  const sorted = [...data.constellations].sort((a,b) => b.score - a.score);
+  let html = '<div class="feed-grid">';
+  for (const c of sorted) {
+    const color = TYPE_COLORS[c.constellation_type] || '#888';
+    html += `<div class="feed-card">
+      <div class="card-header">
+        <div class="card-title">${esc(c.title)}</div>
+        <span class="card-badge" style="background:${color}">${c.constellation_type}</span>
+      </div>
+      <div class="card-score">Score: <strong>${c.score}</strong>/10</div>
+      <div class="card-text">${esc(c.explanation)}</div>
+      <div class="chips">${c.idea_ids.map(id => {
+        const idea = data.ideas[id];
+        return `<span class="chip">${esc(idea?.title || 'ID:'+id)}</span>`;
+      }).join('')}</div>
+    </div>`;
   }
+  html += '</div>';
+
+  if (data.patterns.length > 0) {
+    html += '<div class="feed-section-title">Emergent Patterns</div>';
+    for (const p of data.patterns) {
+      html += `<div class="pattern-card">
+        <div class="pt-title">${esc(p.pattern_title)}</div>
+        <div class="pt-text">${esc(p.pattern_description)}</div>
+      </div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 </script>
-
 </body>
 </html>
