@@ -121,8 +121,13 @@ export interface ModelPricing {
   output_per_million: number;
 }
 
+// Model IDs include date snapshots. If Anthropic releases new snapshots,
+// add them here or cost tracking will silently report $0 for unknown models.
+// Check https://docs.anthropic.com/en/docs/about-claude/models for current IDs.
 export const MODEL_PRICING: Record<string, ModelPricing> = {
   'claude-haiku-4-5-20251001': { input_per_million: 0.80, output_per_million: 4.00 },
   'claude-sonnet-4-5-20250929': { input_per_million: 3.00, output_per_million: 15.00 },
+  'claude-sonnet-4-6-20260514': { input_per_million: 3.00, output_per_million: 15.00 },
   'claude-opus-4-5-20251101': { input_per_million: 15.00, output_per_million: 75.00 },
+  'claude-opus-4-6-20260409': { input_per_million: 15.00, output_per_million: 75.00 },
 };
