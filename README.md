@@ -1,5 +1,7 @@
 # Constellate Engine
 
+> See [constellate.fyi](https://constellate.fyi) for the hosted product and [constellate-web](https://github.com/Harthor/constellate-web) for the frontend source.
+
 Discover non-obvious patterns across large idea corpora using AI-powered constellation detection.
 
 Constellate takes a collection of ideas/projects/concepts, clusters them by semantic similarity using TF-IDF embeddings, forms neighborhoods of related ideas, and then uses Claude to find **constellations** — subsets of 3-6 ideas that together reveal something non-obvious that none reveals alone.
@@ -70,9 +72,9 @@ Ideas JSON — array of objects:
 ]
 ```
 
-## Web Visualizer
+## Web Demo
 
-Open `web/index.html` in a browser and load the pipeline output JSON. Displays constellations as filterable cards with scores, types, and linked ideas. A `web/sample-output.json` is included for testing.
+A standalone HTML visualizer is included in `web-demo/` for quick local inspection. Open `web-demo/index.html` via a local HTTP server. For the full frontend, see [constellate-web](https://github.com/Harthor/constellate-web).
 
 ## Architecture
 
@@ -86,7 +88,7 @@ src/
   sources/        — Source scraper interface (bring your own)
   utils/          — Retry, concurrency, cost tracking, hashing
 cli/              — Commander-based CLI
-web/              — Static HTML visualizer
+web-demo/         — Standalone HTML visualizer (for quick local inspection)
 examples/         — Sample dataset + demo script
 tests/            — Vitest test suite
 ```
@@ -140,7 +142,7 @@ Run the full scrape → pipeline → export flow:
 ANTHROPIC_API_KEY=sk-... npx tsx scripts/weekly-run.ts
 ```
 
-To generate a DB compatible with [constellate-landing](https://github.com/Harthor/constellate-landing):
+To generate a DB compatible with the [constellate.fyi](https://constellate.fyi) deployment:
 
 ```bash
 npx tsx scripts/export-landing-db.ts [output-path]
