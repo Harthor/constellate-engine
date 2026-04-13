@@ -84,7 +84,7 @@ export interface PipelineMetadata {
 export interface PipelineResult {
   constellations: Constellation[];
   patterns: EmergentPattern[];
-  ideas: Record<number, { title: string; source: string; category: string; description: string }>;
+  ideas: Record<number, { title: string; source: string; url: string; category: string; description: string }>;
   metadata: PipelineMetadata;
 }
 

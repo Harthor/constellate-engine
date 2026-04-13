@@ -117,10 +117,11 @@ export async function runPipeline(options: RunOptions = {}): Promise<PipelineRes
   console.log(`[time] Total: ${totalMs}ms`);
 
   // Build ideas reference
-  const ideasRef: Record<number, { title: string; source: string; category: string; description: string }> = {};
+  const ideasRef: Record<number, { title: string; source: string; url: string; category: string; description: string }> = {};
   for (const idea of ideas) {
     ideasRef[idea.id] = {
       title: idea.title,
+      url: idea.url,
       source: idea.source,
       category: idea.category,
       description: idea.description,
