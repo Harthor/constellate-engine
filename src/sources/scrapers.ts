@@ -9,12 +9,15 @@ const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
  * language with since=weekly. Iterates 5 languages and dedupes by repo slug.
  */
 export async function scrapeGithub(): Promise<RawIdea[]> {
-  const langs = ['python', 'typescript', 'javascript', 'rust', 'go'];
+  const langs = [
+    'python', 'typescript', 'javascript', 'rust', 'go',
+    'c++', 'java', 'swift', 'php', 'kotlin',
+  ];
   const seen = new Set<string>();
   const items: RawIdea[] = [];
 
   for (const lang of langs) {
-    const url = `https://github.com/trending/${lang}?since=weekly`;
+    const url = `https://github.com/trending/${encodeURIComponent(lang)}?since=weekly`;
     let html: string;
     try {
       const res = await fetch(url, { headers: { 'User-Agent': UA } });
@@ -67,8 +70,8 @@ export async function scrapeHackerNews(): Promise<RawIdea[]> {
 
   const nowSec = Math.floor(Date.now() / 1000);
   const oneWeekAgo = nowSec - 7 * 24 * 60 * 60;
-  const MIN_SCORE = 50;
-  const TARGET = 250;
+  const MIN_SCORE = 30;
+  const TARGET = 400;
   const MAX_POLL = 500;
 
   type HnItem = {
@@ -135,7 +138,7 @@ export async function scrapeArxiv(): Promise<RawIdea[]> {
   ].join('+OR+');
   const url =
     `https://export.arxiv.org/api/query?search_query=${query}` +
-    `&sortBy=submittedDate&sortOrder=descending&max_results=300`;
+    `&sortBy=submittedDate&sortOrder=descending&max_results=1000`;
 
   const res = await fetch(url, {
     headers: { 'User-Agent': 'constellate-engine/1.0' },
@@ -340,16 +343,41 @@ export async function scrapeBetaList(): Promise<RawIdea[]> {
 // ─── Dev.to ────────────────────────────────────────────────────────
 
 export async function scrapeDevTo(): Promise<RawIdea[]> {
-  const res = await fetch('https://dev.to/api/articles?top=7&per_page=20', {
-    headers: { 'User-Agent': 'ConstellateEngine/1.0' },
-  });
-  const articles = (await res.json()) as any;
-  return (Array.isArray(articles) ? articles : []).slice(0, 20).map((a: any) => ({
-    title: a.title,
-    url: a.url,
-    description: `${a.description || ''} | tags: ${(a.tag_list || []).join(', ')} | reactions: ${a.public_reactions_count}`,
-    source: 'devto',
-  }));
+  const ua = { 'User-Agent': 'ConstellateEngine/1.0' };
+  // Main feed: top of the last 7 days, 100 posts.
+  // Plus tag-specific queries so we capture domain-adjacent content that may
+  // not crack the general top-7 list (ML posts often lose to JavaScript ones).
+  const urls = [
+    'https://dev.to/api/articles?top=7&per_page=100',
+    'https://dev.to/api/articles?top=7&per_page=50&tag=ai',
+    'https://dev.to/api/articles?top=7&per_page=50&tag=machinelearning',
+    'https://dev.to/api/articles?top=7&per_page=50&tag=webdev',
+    'https://dev.to/api/articles?top=7&per_page=50&tag=programming',
+  ];
+  const results = await Promise.all(
+    urls.map((u) =>
+      fetch(u, { headers: ua })
+        .then((r) => r.json())
+        .catch(() => []),
+    ),
+  );
+
+  const seen = new Set<string>();
+  const items: RawIdea[] = [];
+  for (const batch of results) {
+    for (const a of Array.isArray(batch) ? batch : []) {
+      if (!a?.url || !a?.title) continue;
+      if (seen.has(a.url)) continue;
+      seen.add(a.url);
+      items.push({
+        title: a.title,
+        url: a.url,
+        description: `${a.description || ''} | tags: ${(a.tag_list || []).join(', ')} | reactions: ${a.public_reactions_count}`,
+        source: 'devto',
+      });
+    }
+  }
+  return items;
 }
 
 // ─── Reddit ────────────────────────────────────────────────────────
@@ -403,19 +431,18 @@ export async function scrapePapersWithCode(): Promise<RawIdea[]> {
 // ─── Hugging Face ──────────────────────────────────────────────────
 
 export async function scrapeHuggingFace(): Promise<RawIdea[]> {
-  const [modelsRes, spacesRes] = await Promise.all([
-    fetch('https://huggingface.co/api/models?sort=likes&limit=15&direction=-1', {
-      headers: { 'User-Agent': 'ConstellateEngine/1.0' },
-    }),
-    fetch('https://huggingface.co/api/spaces?sort=likes&limit=10&direction=-1', {
-      headers: { 'User-Agent': 'ConstellateEngine/1.0' },
-    }),
+  const ua = { 'User-Agent': 'ConstellateEngine/1.0' };
+  const [modelsRes, spacesRes, datasetsRes] = await Promise.all([
+    fetch('https://huggingface.co/api/models?sort=likes&limit=100&direction=-1', { headers: ua }),
+    fetch('https://huggingface.co/api/spaces?sort=likes&limit=50&direction=-1', { headers: ua }),
+    fetch('https://huggingface.co/api/datasets?sort=likes&limit=50&direction=-1', { headers: ua }),
   ]);
   const models = (await modelsRes.json()) as any;
   const spaces = (await spacesRes.json()) as any;
+  const datasets = (await datasetsRes.json()) as any;
   const items: RawIdea[] = [];
 
-  for (const m of (Array.isArray(models) ? models : []).slice(0, 15)) {
+  for (const m of (Array.isArray(models) ? models : []).slice(0, 100)) {
     items.push({
       title: m.id,
       url: `https://huggingface.co/${m.id}`,
@@ -423,11 +450,19 @@ export async function scrapeHuggingFace(): Promise<RawIdea[]> {
       source: 'huggingface',
     });
   }
-  for (const s of (Array.isArray(spaces) ? spaces : []).slice(0, 10)) {
+  for (const s of (Array.isArray(spaces) ? spaces : []).slice(0, 50)) {
     items.push({
       title: s.id,
       url: `https://huggingface.co/spaces/${s.id}`,
       description: `Space | likes: ${s.likes}`,
+      source: 'huggingface',
+    });
+  }
+  for (const d of (Array.isArray(datasets) ? datasets : []).slice(0, 50)) {
+    items.push({
+      title: d.id,
+      url: `https://huggingface.co/datasets/${d.id}`,
+      description: `Dataset | likes: ${d.likes} | downloads: ${d.downloads ?? '?'}`,
       source: 'huggingface',
     });
   }
