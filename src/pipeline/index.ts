@@ -11,16 +11,16 @@ import { timer } from '../utils/timer.js';
 import Database from 'better-sqlite3';
 
 export const DEFAULT_CONFIG: PipelineConfig = {
-  num_clusters: 15,
-  max_neighborhood_size: 25,
-  min_neighborhood_size: 15,
+  num_clusters: 30,
+  max_neighborhood_size: 30,
+  min_neighborhood_size: 20,
   max_cross_cluster_neighborhoods: 10,
-  max_total_neighborhoods: 25,
+  max_total_neighborhoods: 50,
   discovery_model: 'claude-sonnet-4-5-20250929',
   patterns_model: 'claude-opus-4-5-20251101',
   min_constellation_score: 6,
   discovery_concurrency: 5,
-  cost_budget_usd: 5.0,
+  cost_budget_usd: 15.0,
 };
 
 export interface RunOptions {

@@ -4,129 +4,277 @@ const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
 
 // ─── GitHub Trending ───────────────────────────────────────────────
 
+/**
+ * GitHub has no official trending API, so we scrape the trending pages per
+ * language with since=weekly. Iterates 5 languages and dedupes by repo slug.
+ */
 export async function scrapeGithub(): Promise<RawIdea[]> {
-  const res = await fetch('https://github.com/trending?since=monthly', {
-    headers: { 'User-Agent': UA },
-  });
-  const html = await res.text();
+  const langs = ['python', 'typescript', 'javascript', 'rust', 'go'];
+  const seen = new Set<string>();
   const items: RawIdea[] = [];
 
-  const repoRegex = /href="\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)"[^>]*class="Link"/g;
-  const descRegex = /<p class="col-9[^"]*"[^>]*>([\s\S]*?)<\/p>/g;
+  for (const lang of langs) {
+    const url = `https://github.com/trending/${lang}?since=weekly`;
+    let html: string;
+    try {
+      const res = await fetch(url, { headers: { 'User-Agent': UA } });
+      html = await res.text();
+    } catch {
+      continue;
+    }
 
-  const repos: string[] = [];
-  let m;
-  while ((m = repoRegex.exec(html)) !== null) {
-    if (!repos.includes(m[1])) repos.push(m[1]);
+    const repoRegex = /href="\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)"[^>]*class="Link"/g;
+    const descRegex = /<p class="col-9[^"]*"[^>]*>([\s\S]*?)<\/p>/g;
+
+    const repos: string[] = [];
+    let m;
+    while ((m = repoRegex.exec(html)) !== null) {
+      if (!repos.includes(m[1])) repos.push(m[1]);
+    }
+
+    const descs: string[] = [];
+    while ((m = descRegex.exec(html)) !== null) {
+      descs.push(m[1].replace(/<[^>]+>/g, '').trim());
+    }
+
+    for (let i = 0; i < repos.length; i++) {
+      const slug = repos[i];
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      items.push({
+        title: slug,
+        url: `https://github.com/${slug}`,
+        description:
+          (descs[i] || '') +
+          (descs[i] ? ` | lang: ${lang}` : `lang: ${lang}`),
+        source: 'github',
+      });
+    }
   }
-
-  const descs: string[] = [];
-  while ((m = descRegex.exec(html)) !== null)
-    descs.push(m[1].replace(/<[^>]+>/g, '').trim());
-
-  for (let i = 0; i < repos.length; i++) {
-    items.push({
-      title: repos[i],
-      url: `https://github.com/${repos[i]}`,
-      description: descs[i] || '',
-      source: 'github',
-    });
-  }
-  return items.slice(0, 25);
+  return items;
 }
 
 // ─── Hacker News ───────────────────────────────────────────────────
 
+/**
+ * Pull the top 500 stories from HN and keep stories from the last 7 days
+ * with score > 50. Batched fetches with early-stop at TARGET so we don't
+ * hammer the firebase API when the top is well above the threshold.
+ */
 export async function scrapeHackerNews(): Promise<RawIdea[]> {
   const res = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
   const ids = (await res.json()) as number[];
 
-  const stories = await Promise.all(
-    ids.slice(0, 20).map(async (id) => {
-      const r = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
-      return (await r.json()) as any;
-    }),
-  );
+  const nowSec = Math.floor(Date.now() / 1000);
+  const oneWeekAgo = nowSec - 7 * 24 * 60 * 60;
+  const MIN_SCORE = 50;
+  const TARGET = 250;
+  const MAX_POLL = 500;
 
-  return stories
-    .filter((s: any) => s?.url && s?.title)
-    .map((s: any) => ({
-      title: s.title,
-      url: s.url,
-      description: `HN score: ${s.score} | comments: ${s.descendants ?? 0}`,
-      source: 'hn',
-    }));
+  type HnItem = {
+    id?: number;
+    url?: string;
+    title?: string;
+    score?: number;
+    descendants?: number;
+    time?: number;
+    deleted?: boolean;
+    dead?: boolean;
+    type?: string;
+  };
+
+  const idsToPoll = ids.slice(0, MAX_POLL);
+  const out: RawIdea[] = [];
+  const BATCH = 40;
+  for (let i = 0; i < idsToPoll.length && out.length < TARGET; i += BATCH) {
+    const batch = idsToPoll.slice(i, i + BATCH);
+    const items = await Promise.all(
+      batch.map(async (id) => {
+        try {
+          const r = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+          return (await r.json()) as HnItem;
+        } catch {
+          return null;
+        }
+      }),
+    );
+    for (const s of items) {
+      if (!s || s.deleted || s.dead) continue;
+      if (s.type !== 'story') continue;
+      if (!s.url || !s.title) continue;
+      if ((s.score ?? 0) < MIN_SCORE) continue;
+      if ((s.time ?? 0) < oneWeekAgo) continue;
+      out.push({
+        title: s.title,
+        url: s.url,
+        description: `HN score: ${s.score ?? 0} | comments: ${s.descendants ?? 0}`,
+        source: 'hn',
+      });
+      if (out.length >= TARGET) break;
+    }
+  }
+  return out;
 }
 
-// ─── arXiv (CS.AI) ─────────────────────────────────────────────────
+// ─── arXiv (CS) ────────────────────────────────────────────────────
 
+/**
+ * Pull papers from the last 7 days across the main CS sub-categories,
+ * sorted by submission date. Uses the official Atom API (not the RSS
+ * feed, which only returns ~20 items). Parsing is done with regex to
+ * avoid pulling in an XML lib for this single consumer.
+ */
 export async function scrapeArxiv(): Promise<RawIdea[]> {
-  const res = await fetch('https://rss.arxiv.org/rss/cs.AI');
-  const xml = await res.text();
-  const items: RawIdea[] = [];
+  const query = [
+    'cat:cs.AI',
+    'cat:cs.CL',
+    'cat:cs.LG',
+    'cat:cs.CV',
+    'cat:cs.SE',
+    'cat:cs.DC',
+  ].join('+OR+');
+  const url =
+    `https://export.arxiv.org/api/query?search_query=${query}` +
+    `&sortBy=submittedDate&sortOrder=descending&max_results=300`;
 
-  const entryRe = /<item>([\s\S]*?)<\/item>/g;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'constellate-engine/1.0' },
+  });
+  const xml = await res.text();
+
+  // Atom <entry>…</entry>. We strip namespaces off tag names by matching
+  // the unqualified forms (arxiv namespaces them but the regex doesn't care).
+  const entryRe = /<entry>([\s\S]*?)<\/entry>/g;
   const titleRe = /<title>([\s\S]*?)<\/title>/;
-  const linkRe = /<link>([\s\S]*?)<\/link>/;
-  const descRe = /<description>([\s\S]*?)<\/description>/;
+  const summaryRe = /<summary>([\s\S]*?)<\/summary>/;
+  const publishedRe = /<published>([\s\S]*?)<\/published>/;
+  // The <link rel="alternate" href="…"> link is the human-readable URL.
+  // arxiv puts href BEFORE rel, so match either order.
+  const altLinkReA = /<link[^>]+href="([^"]+)"[^>]+rel="alternate"/;
+  const altLinkReB = /<link[^>]+rel="alternate"[^>]+href="([^"]+)"/;
+
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const out: RawIdea[] = [];
 
   let m;
   while ((m = entryRe.exec(xml)) !== null) {
     const block = m[1];
-    const title = titleRe.exec(block)?.[1]?.replace(/<[^>]+>/g, '').trim();
-    const link = linkRe.exec(block)?.[1]?.trim();
-    const desc = descRe.exec(block)?.[1]?.replace(/<[^>]+>/g, '').trim().slice(0, 300);
-    if (title && link) {
-      items.push({ title, url: link, description: desc || '', source: 'arxiv' });
+    const title = titleRe
+      .exec(block)?.[1]
+      ?.replace(/\s+/g, ' ')
+      .replace(/<[^>]+>/g, '')
+      .trim();
+    const url =
+      altLinkReA.exec(block)?.[1]?.trim() ??
+      altLinkReB.exec(block)?.[1]?.trim();
+    const summary = summaryRe
+      .exec(block)?.[1]
+      ?.replace(/\s+/g, ' ')
+      .replace(/<[^>]+>/g, '')
+      .trim()
+      .slice(0, 400);
+    const publishedStr = publishedRe.exec(block)?.[1]?.trim();
+    if (!title || !url) continue;
+    if (publishedStr) {
+      const t = Date.parse(publishedStr);
+      if (Number.isFinite(t) && t < oneWeekAgo) continue;
     }
+    out.push({
+      title,
+      url,
+      description: summary || '',
+      source: 'arxiv',
+    });
   }
-  return items.slice(0, 20);
+  return out;
 }
 
 // ─── Product Hunt ──────────────────────────────────────────────────
 
+/**
+ * Uses the GraphQL v2 API with a Developer Token (PRODUCTHUNT_TOKEN).
+ * Pulls the top 100 launches from the last 7 days, ordered by votes.
+ *
+ * Falls back to the old HTML-scrape path if no token is configured so
+ * the scraper still returns something in local-dev without secrets.
+ */
 export async function scrapeProductHunt(): Promise<RawIdea[]> {
+  const token = process.env.PRODUCTHUNT_TOKEN;
+
+  if (token) {
+    // GraphQL supports `postedAfter: DateTime!` to scope to recent launches.
+    const postedAfter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const out: RawIdea[] = [];
+    let cursor: string | null = null;
+    // PH caps `first` at 20. Paginate up to 5 pages = 100 posts.
+    for (let page = 0; page < 5; page++) {
+      const query = `
+        query ($after: String, $postedAfter: DateTime) {
+          posts(first: 20, order: VOTES, after: $after, postedAfter: $postedAfter) {
+            edges {
+              cursor
+              node { name tagline url website votesCount }
+            }
+            pageInfo { endCursor hasNextPage }
+          }
+        }
+      `;
+      const r = await fetch('https://api.producthunt.com/v2/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'constellate-engine/1.0',
+        },
+        body: JSON.stringify({
+          query,
+          variables: { after: cursor, postedAfter },
+        }),
+      });
+      if (!r.ok) break;
+      const d = (await r.json()) as any;
+      const edges = d?.data?.posts?.edges ?? [];
+      for (const { node } of edges) {
+        out.push({
+          title: node.name,
+          url: node.website || node.url,
+          description: `${node.tagline}${node.votesCount ? ` | votes: ${node.votesCount}` : ''}`,
+          source: 'producthunt',
+        });
+      }
+      if (!d?.data?.posts?.pageInfo?.hasNextPage) break;
+      cursor = d.data.posts.pageInfo.endCursor;
+      if (!cursor) break;
+    }
+    return out;
+  }
+
+  // ── Fallback: HTML scrape of the homepage (no token) ─────────────
   const res = await fetch('https://www.producthunt.com/', {
     headers: { 'User-Agent': UA, Accept: 'text/html' },
   });
   const html = await res.text();
-
   const jsonMatch = html.match(/window\.__NEXT_DATA__\s*=\s*(\{[\s\S]*?)\s*<\/script>/);
-  if (jsonMatch) {
-    try {
-      const data = JSON.parse(jsonMatch[1]) as any;
-      const str = JSON.stringify(data);
-      const postMatches = str.match(/"name":"([^"]+)","tagline":"([^"]+)","url":"([^"]+)"/g) ?? [];
-      if (postMatches.length > 0) {
-        return postMatches.slice(0, 20).map((m) => {
-          const [, name, tagline, url] = m.match(/"name":"([^"]+)","tagline":"([^"]+)","url":"([^"]+)"/) ?? [];
-          return {
-            title: name,
-            url: `https://www.producthunt.com${url}`,
-            description: tagline,
-            source: 'producthunt',
-          };
-        }).filter((i) => i.title);
-      }
-    } catch { /* fall through */ }
+  if (!jsonMatch) return [];
+  try {
+    const str = jsonMatch[1];
+    const postMatches = str.match(/"name":"([^"]+)","tagline":"([^"]+)","url":"([^"]+)"/g) ?? [];
+    return postMatches
+      .slice(0, 20)
+      .map((m) => {
+        const [, name, tagline, url] =
+          m.match(/"name":"([^"]+)","tagline":"([^"]+)","url":"([^"]+)"/) ?? [];
+        return {
+          title: name,
+          url: `https://www.producthunt.com${url}`,
+          description: tagline,
+          source: 'producthunt',
+        };
+      })
+      .filter((i) => i.title);
+  } catch {
+    return [];
   }
-
-  // Fallback: GraphQL API with token
-  const token = process.env.PRODUCTHUNT_TOKEN;
-  if (!token) return [];
-  const query = `{ posts(first: 20, order: VOTES) { edges { node { name tagline url website } } } }`;
-  const r = await fetch('https://api.producthunt.com/v2/api/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ query }),
-  });
-  const d = (await r.json()) as any;
-  return (d?.data?.posts?.edges ?? []).map(({ node }: any) => ({
-    title: node.name,
-    url: node.website || node.url,
-    description: node.tagline,
-    source: 'producthunt',
-  }));
 }
 
 // ─── Y Combinator ──────────────────────────────────────────────────
