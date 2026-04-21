@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS constellations_cache (
   title              TEXT NOT NULL,
   explanation        TEXT NOT NULL,
   score              INTEGER NOT NULL,
+  actionability      INTEGER,
   model              TEXT NOT NULL,
   prompt_version     TEXT NOT NULL,
   created_at         TEXT NOT NULL DEFAULT (datetime('now'))

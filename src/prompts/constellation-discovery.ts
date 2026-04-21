@@ -1,4 +1,4 @@
-export const CONSTELLATION_DISCOVERY_VERSION = 'constellation_v1';
+export const CONSTELLATION_DISCOVERY_VERSION = 'constellation_v2_actionability';
 
 export const CONSTELLATION_DISCOVERY_SYSTEM =
   'You are an innovation analyst with strong lateral thinking skills. Always respond with valid JSON, no markdown or backticks.';
@@ -26,6 +26,14 @@ HARD RULES:
 - The EXPLANATION must be 3-5 sentences maximum. Dense, not padded.
 - Assign a SCORE from 1 to 10 to each constellation based on how non-obvious and valuable it is.
 
+ACTIONABILITY — absences only:
+For constellations of type "absence", ALSO include an "actionability" score from 1 to 10 representing how easily an indie hacker or solo founder could start building the missing piece:
+- 10 = could start today. Problem is clear, scope is bounded, market is obvious. A small team with product sense could ship v1 in weeks.
+- 7-9 = concrete and buildable but requires some scope or tech decisions up front.
+- 4-6 = valid idea but abstract, systems-level, or very technical. Would take a specialist or a much bigger team.
+- 1-3 = philosophical, research-level, policy-shaped, or too vague to ship. No clear product.
+Omit the "actionability" field for non-absence types (chain, triangulation, convergence, spectrum).
+
 Return JSON strictly with this format:
 {
   "constellations": [
@@ -34,7 +42,8 @@ Return JSON strictly with this format:
       "idea_ids": [1, 2, 3],
       "title": "Short punchy title",
       "explanation": "Dense 3-5 sentence explanation.",
-      "score": 8
+      "score": 8,
+      "actionability": 7
     }
   ]
 }

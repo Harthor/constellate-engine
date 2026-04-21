@@ -36,6 +36,12 @@ export interface Constellation {
   title: string;
   explanation: string;
   score: number;
+  /**
+   * For constellation_type === "absence" only: 1-10 score of how buildable
+   * the missing piece is for an indie hacker / solo founder. Omitted on
+   * other types.
+   */
+  actionability?: number;
   model: string;
   prompt_version: string;
   created_at?: string;

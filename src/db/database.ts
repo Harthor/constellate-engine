@@ -145,11 +145,12 @@ export function getCachedConstellations(
   title: string;
   explanation: string;
   score: number;
+  actionability: number | null;
 }> {
   const d = instance || getDb();
   return d
     .prepare(
-      `SELECT constellation_type, idea_ids, title, explanation, score
+      `SELECT constellation_type, idea_ids, title, explanation, score, actionability
        FROM constellations_cache
        WHERE neighborhood_hash = ? AND prompt_version = ?`,
     )
@@ -159,6 +160,7 @@ export function getCachedConstellations(
     title: string;
     explanation: string;
     score: number;
+    actionability: number | null;
   }>;
 }
 
@@ -170,6 +172,7 @@ export function cacheConstellation(
     title: string;
     explanation: string;
     score: number;
+    actionability?: number | null;
     model: string;
     prompt_version: string;
   },
@@ -178,8 +181,8 @@ export function cacheConstellation(
   const d = instance || getDb();
   d.prepare(
     `INSERT INTO constellations_cache
-     (neighborhood_hash, constellation_type, idea_ids, title, explanation, score, model, prompt_version)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     (neighborhood_hash, constellation_type, idea_ids, title, explanation, score, actionability, model, prompt_version)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     data.neighborhood_hash,
     data.constellation_type,
@@ -187,6 +190,7 @@ export function cacheConstellation(
     data.title,
     data.explanation,
     data.score,
+    data.actionability ?? null,
     data.model,
     data.prompt_version,
   );

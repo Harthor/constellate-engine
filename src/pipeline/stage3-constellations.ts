@@ -63,6 +63,7 @@ export async function stage3Constellations(
                 title: row.title,
                 explanation: row.explanation,
                 score: row.score,
+                actionability: row.actionability ?? undefined,
                 model: config.discovery_model,
                 prompt_version: CONSTELLATION_DISCOVERY_VERSION,
               });
@@ -113,6 +114,14 @@ export async function stage3Constellations(
           for (const c of constellations) {
             if (c.score < config.min_constellation_score) continue;
 
+            // Only keep actionability for absences; ignore if Claude emits
+            // it elsewhere or clamp to [1..10] if it comes back out of range.
+            const rawAct = typeof c.actionability === 'number' ? c.actionability : null;
+            const actionability =
+              c.type === 'absence' && rawAct !== null
+                ? Math.max(1, Math.min(10, Math.round(rawAct)))
+                : null;
+
             const constellation: Constellation = {
               neighborhood_hash: hash,
               constellation_type: c.type as ConstellationType,
@@ -120,6 +129,7 @@ export async function stage3Constellations(
               title: c.title,
               explanation: c.explanation,
               score: c.score,
+              actionability: actionability ?? undefined,
               model: config.discovery_model,
               prompt_version: CONSTELLATION_DISCOVERY_VERSION,
             };
@@ -132,6 +142,7 @@ export async function stage3Constellations(
                 title: c.title,
                 explanation: c.explanation,
                 score: c.score,
+                actionability,
                 model: config.discovery_model,
                 prompt_version: CONSTELLATION_DISCOVERY_VERSION,
               },
