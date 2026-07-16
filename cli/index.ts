@@ -1,78 +1,175 @@
 import { Command } from 'commander';
-import { readFileSync } from 'fs';
-import { writeFileSync } from 'fs';
-import { runPipeline, DEFAULT_CONFIG } from '../src/pipeline/index.js';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createInterface } from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
+import { runPipeline } from '../src/pipeline/index.js';
+import { loadPipelineConfig } from '../src/config.js';
+import type { PipelineConfig, PreflightReport, RawIdea } from '../src/types/index.js';
 import { getDb, bulkInsertIdeas, clearCache, closeDb } from '../src/db/database.js';
 import { createEmbedder } from '../src/embeddings/embedder.js';
 import { SCRAPERS, SOURCE_NAMES, scrapeAll } from '../src/sources/scrapers.js';
+import { validatePipelineResult } from '../src/output-schema.js';
 
 const program = new Command();
+const defaults = loadPipelineConfig();
 
 program
   .name('constellate')
   .description('Discover non-obvious patterns across idea corpora')
-  .version('0.1.0');
+  .version('0.2.0');
 
-program
-  .command('run')
-  .description('Run the full constellation pipeline')
-  .option('--force', 'Force recompute (ignore cache)', false)
-  .option('--clusters <n>', 'Number of clusters', String(DEFAULT_CONFIG.num_clusters))
-  .option('--min-score <n>', 'Minimum constellation score', String(DEFAULT_CONFIG.min_constellation_score))
-  .option('--model <model>', 'Discovery model', DEFAULT_CONFIG.discovery_model)
-  .option('--output <path>', 'Output JSON path', 'output.json')
-  .option('--embedder <name>', 'Embedder to use', 'tfidf')
-  .action(async (opts) => {
-    try {
-      const embedder = await createEmbedder(opts.embedder);
-      const result = await runPipeline({
-        config: {
-          num_clusters: parseInt(opts.clusters),
-          min_constellation_score: parseInt(opts.minScore),
-          discovery_model: opts.model,
-        },
-        embedder,
-        forceRecompute: opts.force,
-      });
+function addPipelineOptions(command: Command): Command {
+  return command
+    .option('--force', 'Ignore reusable caches', false)
+    .option('--retry-failed', 'Retry only reviewed invalid/refused cache entries', false)
+    .option('--skip-failed', 'Skip reviewed invalid/refused entries without retrying', false)
+    .option('--clusters <n>', 'Number of clusters', String(defaults.num_clusters))
+    .option('--min-score <n>', 'Minimum constellation score', String(defaults.min_constellation_score))
+    .option('--model <model>', 'Anthropic model', defaults.model)
+    .option('--max-output-tokens <n>', 'Maximum output tokens per call', String(defaults.max_output_tokens))
+    .option('--effort <level>', 'Fable reasoning effort', defaults.effort)
+    .option('--max-budget-usd <n>', 'Hard run budget in USD', String(defaults.max_budget_usd))
+    .option('--max-calls <n>', 'Hard provider call limit', String(defaults.max_calls))
+    .option('--concurrency <n>', 'Provider request concurrency', String(defaults.concurrency))
+    .option('--input-usd-per-million <n>', 'Input price per million tokens', String(defaults.input_usd_per_million))
+    .option('--output-usd-per-million <n>', 'Output price per million tokens', String(defaults.output_usd_per_million))
+    .option('--limit <n>', 'Analyze only the first N ideas')
+    .option('--embedder <name>', 'Embedder to use', 'tfidf');
+}
 
+function configFromOptions(opts: Record<string, string>): Partial<PipelineConfig> {
+  return {
+    num_clusters: Number(opts.clusters),
+    min_constellation_score: Number(opts.minScore),
+    model: opts.model,
+    max_output_tokens: Number(opts.maxOutputTokens),
+    effort: opts.effort as PipelineConfig['effort'],
+    max_budget_usd: Number(opts.maxBudgetUsd),
+    max_calls: Number(opts.maxCalls),
+    concurrency: Number(opts.concurrency),
+    input_usd_per_million: Number(opts.inputUsdPerMillion),
+    output_usd_per_million: Number(opts.outputUsdPerMillion),
+  };
+}
+
+async function confirmSpend(report: PreflightReport): Promise<boolean> {
+  if (!stdin.isTTY || !stdout.isTTY) return false;
+  const readline = createInterface({ input: stdin, output: stdout });
+  try {
+    const answer = await readline.question(
+      `Maximum theoretical cost is USD ${report.maximum_theoretical_cost_usd.toFixed(4)} ` +
+        `(hard budget USD ${report.configured_budget_usd.toFixed(4)}). Type YES to spend: `,
+    );
+    return answer.trim() === 'YES';
+  } finally {
+    readline.close();
+  }
+}
+
+addPipelineOptions(
+  program
+    .command('run')
+    .description('Run the pipeline; defaults to a zero-call dry run')
+    .option('--output <path>', 'Output JSON path', 'output.json')
+    .option('--dry-run', 'Force zero provider calls', false)
+    .option('--yes', 'Skip the interactive paid-run confirmation', false),
+).action(async (opts) => {
+  try {
+    const config = configFromOptions(opts);
+    const dryRun = opts.dryRun || Number(opts.maxBudgetUsd) === 0 || Number(opts.maxCalls) === 0;
+    const result = await runPipeline({
+      config,
+      embedder: await createEmbedder(opts.embedder),
+      forceRecompute: opts.force,
+      retryFailed: opts.retryFailed,
+      skipFailed: opts.skipFailed,
+      limit: opts.limit ? Number(opts.limit) : undefined,
+      dryRun,
+      yes: opts.yes,
+      confirmSpend,
+    });
+
+    if (dryRun) {
+      console.log('\nDry run complete. No output file was written and no provider call was made.');
+    } else {
+      const validation = validatePipelineResult(result);
+      if (!validation.success) throw new Error(validation.errors.join('; '));
       writeFileSync(opts.output, JSON.stringify(result, null, 2));
-      console.log(`\nResults written to ${opts.output}`);
-
+      console.log(`\nValidated results written to ${opts.output}`);
       printSummary(result);
-      closeDb();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`Error: ${msg}`);
-      process.exit(1);
     }
-  });
+    closeDb();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Error: ${message}`);
+    closeDb();
+    process.exitCode = 1;
+  }
+});
+
+addPipelineOptions(
+  program.command('dry-run').description('Estimate 30 ideas, 50 ideas, and the full local dataset'),
+).action(async (opts) => {
+  try {
+    const db = getDb();
+    const total = (db.prepare('SELECT COUNT(*) AS count FROM ideas').get() as { count: number }).count;
+    const requested = opts.limit ? [Number(opts.limit)] : [30, 50, total];
+    const limits = Array.from(new Set(requested.filter((value) => value >= 3 && value <= total)));
+    if (limits.length === 0) throw new Error(`No valid dry-run scenario for ${total} stored ideas.`);
+
+    for (const limit of limits) {
+      console.log(`\n\n########## DRY-RUN SCENARIO: ${limit} IDEAS ##########`);
+      await runPipeline({
+        db,
+        config: configFromOptions(opts),
+        embedder: await createEmbedder(opts.embedder),
+        forceRecompute: opts.force,
+        retryFailed: opts.retryFailed,
+        skipFailed: opts.skipFailed,
+        limit,
+        dryRun: true,
+      });
+    }
+    closeDb();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Error: ${message}`);
+    closeDb();
+    process.exitCode = 1;
+  }
+});
 
 program
   .command('ingest <file>')
-  .description('Import ideas from a JSON file')
+  .description('Import ideas from an array or pipeline-output JSON file')
   .action((file) => {
     try {
-      const data = JSON.parse(readFileSync(file, 'utf-8'));
-      const ideas = Array.isArray(data) ? data : data.ideas || [];
-
-      if (ideas.length === 0) {
-        console.error('No ideas found in file.');
-        process.exit(1);
+      const data: unknown = JSON.parse(readFileSync(file, 'utf8'));
+      let ideas: RawIdea[] = [];
+      if (Array.isArray(data)) ideas = data as RawIdea[];
+      else if (typeof data === 'object' && data !== null && 'ideas' in data) {
+        const value = (data as { ideas?: unknown }).ideas;
+        ideas = Array.isArray(value)
+          ? (value as RawIdea[])
+          : typeof value === 'object' && value !== null
+            ? (Object.values(value) as RawIdea[])
+            : [];
       }
-
+      if (ideas.length === 0) throw new Error('No ideas found in file.');
       const count = bulkInsertIdeas(ideas);
       console.log(`Ingested ${count} new ideas (${ideas.length - count} duplicates skipped).`);
       closeDb();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`Error: ${msg}`);
-      process.exit(1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Error: ${message}`);
+      closeDb();
+      process.exitCode = 1;
     }
   });
 
 program
   .command('clear-cache')
-  .description('Clear all cached embeddings, constellations, and patterns')
+  .description('Clear embeddings and AI response caches')
   .action(() => {
     clearCache();
     console.log('Cache cleared.');
@@ -85,39 +182,30 @@ program
   .action(async (source?: string) => {
     try {
       if (source && !SCRAPERS[source]) {
-        console.error(`Unknown source: ${source}`);
-        console.error(`Available: ${SOURCE_NAMES.join(', ')}`);
-        process.exit(1);
+        throw new Error(`Unknown source: ${source}. Available: ${SOURCE_NAMES.join(', ')}`);
       }
-
-      if (source) {
-        console.log(`Scraping ${source}...`);
-        const ideas = await SCRAPERS[source]();
-        console.log(`  Fetched ${ideas.length} ideas`);
-        const count = bulkInsertIdeas(ideas);
-        console.log(`  Ingested ${count} new (${ideas.length - count} duplicates)`);
-      } else {
-        console.log(`Scraping all ${SOURCE_NAMES.length} sources...\n`);
-        const results = await scrapeAll();
-        let totalNew = 0;
-        let totalFetched = 0;
-        for (const r of results) {
-          if (r.error) {
-            console.log(`  [${r.source}] ERROR: ${r.error}`);
-            continue;
-          }
-          const count = bulkInsertIdeas(r.ideas);
-          totalNew += count;
-          totalFetched += r.ideas.length;
-          console.log(`  [${r.source}] ${r.ideas.length} fetched, ${count} new`);
+      const results = source
+        ? [{ source, ideas: await SCRAPERS[source]() }]
+        : await scrapeAll();
+      let totalFetched = 0;
+      let totalNew = 0;
+      for (const result of results) {
+        if (result.error) {
+          console.log(`  [${result.source}] ERROR: ${result.error}`);
+          continue;
         }
-        console.log(`\nTotal: ${totalFetched} fetched, ${totalNew} new ideas ingested`);
+        const count = bulkInsertIdeas(result.ideas);
+        totalFetched += result.ideas.length;
+        totalNew += count;
+        console.log(`  [${result.source}] ${result.ideas.length} fetched, ${count} new`);
       }
+      console.log(`Total: ${totalFetched} fetched, ${totalNew} new ideas ingested.`);
       closeDb();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`Error: ${msg}`);
-      process.exit(1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Error: ${message}`);
+      closeDb();
+      process.exitCode = 1;
     }
   });
 
@@ -126,37 +214,28 @@ program
   .description('Show database statistics')
   .action(() => {
     const db = getDb();
-    const ideas = db.prepare('SELECT COUNT(*) as count FROM ideas').get() as { count: number };
-    const embeddings = db.prepare('SELECT COUNT(*) as count FROM idea_embeddings').get() as { count: number };
-    const constellations = db.prepare('SELECT COUNT(*) as count FROM constellations_cache').get() as { count: number };
-    const patterns = db.prepare('SELECT COUNT(*) as count FROM cluster_patterns_cache').get() as { count: number };
-
-    console.log(`Ideas:          ${ideas.count}`);
-    console.log(`Embeddings:     ${embeddings.count}`);
-    console.log(`Constellations: ${constellations.count} (cached)`);
-    console.log(`Patterns:       ${patterns.count} (cached)`);
+    for (const [label, table] of [
+      ['Ideas', 'ideas'],
+      ['Embeddings', 'idea_embeddings'],
+      ['Constellations', 'constellations_cache'],
+      ['Patterns', 'cluster_patterns_cache'],
+      ['Cached API jobs', 'api_call_cache'],
+      ['API attempts', 'api_call_attempts'],
+    ]) {
+      const row = db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get() as { count: number };
+      console.log(`${label.padEnd(15)} ${row.count}`);
+    }
     closeDb();
   });
 
 function printSummary(result: Awaited<ReturnType<typeof runPipeline>>) {
-  const { metadata, constellations } = result;
-
   console.log('\n─── Summary ───');
-  console.log(`Ideas analyzed:  ${metadata.total_ideas}`);
-  console.log(`Neighborhoods:   ${metadata.neighborhoods_total}`);
-  console.log(`Constellations:  ${metadata.constellations_found}`);
+  console.log(`Ideas analyzed:  ${result.metadata.total_ideas}`);
+  console.log(`Neighborhoods:   ${result.metadata.neighborhoods_total}`);
+  console.log(`Constellations:  ${result.metadata.constellations_found}`);
   console.log(`Patterns:        ${result.patterns.length}`);
-  console.log(`Cost:            $${metadata.estimated_cost_usd.toFixed(4)}`);
-  console.log(`Time:            ${(metadata.elapsed_ms / 1000).toFixed(1)}s`);
-
-  if (constellations.length > 0) {
-    console.log('\n─── Top Constellations ───');
-    const sorted = [...constellations].sort((a, b) => b.score - a.score);
-    for (const c of sorted.slice(0, 5)) {
-      console.log(`  [${c.score}/10] ${c.constellation_type.toUpperCase()}: ${c.title}`);
-      console.log(`          ${c.explanation.slice(0, 120)}...`);
-    }
-  }
+  console.log(`Actual cost:     USD ${result.metadata.estimated_cost_usd.toFixed(4)}`);
+  console.log(`Time:            ${(result.metadata.elapsed_ms / 1000).toFixed(1)}s`);
 }
 
-program.parse();
+await program.parseAsync();

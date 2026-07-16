@@ -8,15 +8,19 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch cli/index.ts",
+    "pipeline": "tsx cli/index.ts",
+    "dry-run": "tsx cli/index.ts dry-run",
     "cli": "tsx cli/index.ts",
     "demo": "tsx examples/demo.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src/ cli/ tests/",
+    "lint": "eslint src/ cli/ scripts/ tests/ examples/",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "clear-cache": "tsx scripts/clear-cache.ts",
-    "generate-embeddings": "tsx scripts/generate-embeddings.ts"
+    "generate-embeddings": "tsx scripts/generate-embeddings.ts",
+    "weekly-run": "tsx scripts/weekly-run.ts",
+    "publish-data": "tsx scripts/publish-data.ts"
   },
   "keywords": [
     "constellation",
@@ -32,18 +36,18 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.111.0",
     "better-sqlite3": "^11.7.0",
     "commander": "^13.1.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.0",
-    "tsx": "^4.19.0",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
-    "@eslint/js": "^9.0.0",
-    "eslint": "^9.0.0",
-    "typescript-eslint": "^8.0.0"
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^3.0.0"
   }
 }

@@ -1,22 +1,22 @@
 /**
  * Demo: ingest sample ideas and run the pipeline.
  *
- * Usage:
- *   ANTHROPIC_API_KEY=sk-... npx tsx examples/demo.ts
+ * Zero-cost usage:
+ *   npx tsx examples/demo.ts
  *
- * Without an API key, it will ingest ideas and run stages 1-2 only
- * (embeddings + neighborhoods), which is useful for testing the
- * local pipeline without spending money.
+ * It runs stages 1-2 only unless both paid limits are configured and
+ * --yes is passed explicitly. The API key still comes only from the shell.
  */
 
 import { readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { createDb, bulkInsertIdeas, loadIdeas, closeDb } from '../src/db/database.js';
+import { createDb, bulkInsertIdeas, loadIdeas } from '../src/db/database.js';
 import { createEmbedder } from '../src/embeddings/embedder.js';
 import { stage1Embeddings } from '../src/pipeline/stage1-embeddings.js';
 import { stage2Neighborhoods } from '../src/pipeline/stage2-neighborhoods.js';
 import { runPipeline, DEFAULT_CONFIG } from '../src/pipeline/index.js';
+import { isDryRunConfig, loadPipelineConfig } from '../src/config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -33,8 +33,9 @@ async function main() {
   const allIdeas = loadIdeas(db);
   console.log(`Total ideas in DB: ${allIdeas.length}`);
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.log('\nNo ANTHROPIC_API_KEY set — running local-only stages (1-2)\n');
+  const runtimeConfig = loadPipelineConfig();
+  if (isDryRunConfig(runtimeConfig)) {
+    console.log('\nZero budget/call limit — running local-only stages (1-2)\n');
 
     const embedder = await createEmbedder('tfidf');
     const config = { ...DEFAULT_CONFIG, num_clusters: 8 };
@@ -51,7 +52,7 @@ async function main() {
     console.log(`\nNeighborhoods: ${s2.neighborhoods.length} (${s2.intraCount} intra + ${s2.crossCount} cross)`);
 
     db.close();
-    console.log('\nDone! To run the full pipeline, set ANTHROPIC_API_KEY.');
+    console.log('\nDone! A paid demo also requires a shell key, positive limits, and --yes.');
     return;
   }
 
@@ -60,6 +61,7 @@ async function main() {
   const result = await runPipeline({
     config: { num_clusters: 8 },
     db,
+    yes: process.argv.includes('--yes'),
   });
 
   const outputPath = join(__dirname, '..', 'demo-output.json');

@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDb, bulkInsertIdeas, loadIdeas } from '../src/db/database.js';
+import { createDb, bulkInsertIdeas, loadIdeas, cacheApiCall } from '../src/db/database.js';
 import { TfIdfEmbedder } from '../src/embeddings/tfidf.js';
 import { stage1Embeddings } from '../src/pipeline/stage1-embeddings.js';
 import { stage2Neighborhoods } from '../src/pipeline/stage2-neighborhoods.js';
-import { DEFAULT_CONFIG } from '../src/pipeline/index.js';
+import { DEFAULT_CONFIG, runPipeline } from '../src/pipeline/index.js';
+import { stage3Constellations } from '../src/pipeline/stage3-constellations.js';
+import type { AiJob } from '../src/pipeline/inputs.js';
+import { CostTracker } from '../src/utils/cost-tracker.js';
+import { ApiBudget } from '../src/utils/api-budget.js';
 import Database from 'better-sqlite3';
 
 const sampleIdeas = [
@@ -118,5 +122,118 @@ describe('Pipeline stages 1-2', () => {
 
       expect(s2.neighborhoods.length).toBeLessThanOrEqual(5);
     });
+  });
+
+  it('runs the full local pipeline in dry-run mode without provider calls', async () => {
+    const result = await runPipeline({
+      db,
+      dryRun: true,
+      config: { num_clusters: 4, max_budget_usd: 0, max_calls: 0 },
+    });
+
+    expect(result.metadata.total_ideas).toBe(sampleIdeas.length);
+    expect(result.metadata.constellation_api_calls).toBe(0);
+    expect(result.metadata.pattern_api_calls).toBe(0);
+    expect(result.metadata.estimated_cost_usd).toBe(0);
+  });
+
+  it('resumes a paid stage from the API ledger without calling the provider again', async () => {
+    const ideaIds = loadIdeas(db).slice(0, 3).map((idea) => idea.id);
+    const job: AiJob = {
+      stage: 'constellations',
+      scopeHash: 'scope-hash',
+      inputHash: 'input-hash',
+      ideaIds,
+      system: 'system',
+      prompt: 'prompt',
+      promptVersion: 'prompt-v1',
+      model: DEFAULT_CONFIG.model,
+      estimatedInputTokens: 10,
+      maximumInputTokens: 20,
+    };
+    cacheApiCall({
+      input_hash: job.inputHash,
+      stage: job.stage,
+      scope_hash: job.scopeHash,
+      model: job.model,
+      prompt_version: job.promptVersion,
+      status: 'valid',
+      response_json: JSON.stringify({
+        constellations: [{
+          type: 'chain',
+          idea_ids: ideaIds,
+          title: 'Cached result',
+          explanation: 'Recovered from the durable paid-call ledger.',
+          score: 8,
+        }],
+      }),
+      input_tokens: 100,
+      output_tokens: 50,
+      cost_usd: 0.0035,
+    }, db);
+
+    const pricing = { input_per_million: 10, output_per_million: 50 };
+    const result = await stage3Constellations(
+      [job],
+      null,
+      DEFAULT_CONFIG,
+      new CostTracker(pricing),
+      new ApiBudget(0, 0, pricing),
+      false,
+      db,
+    );
+
+    expect(result.cacheHits).toBe(1);
+    expect(result.apiCalls).toBe(0);
+    expect(result.constellations).toHaveLength(1);
+    expect(result.constellations[0].title).toBe('Cached result');
+  });
+
+  it('retries only a reviewed failed cache entry without disabling valid caches globally', async () => {
+    const ideaIds = loadIdeas(db).slice(0, 3).map((idea) => idea.id);
+    const job: AiJob = {
+      stage: 'constellations',
+      scopeHash: 'failed-scope',
+      inputHash: 'failed-input',
+      ideaIds,
+      system: 'system',
+      prompt: 'prompt',
+      promptVersion: 'prompt-v1',
+      model: DEFAULT_CONFIG.model,
+      estimatedInputTokens: 10,
+      maximumInputTokens: 20,
+    };
+    cacheApiCall({
+      input_hash: job.inputHash,
+      stage: job.stage,
+      scope_hash: job.scopeHash,
+      model: job.model,
+      prompt_version: job.promptVersion,
+      status: 'invalid',
+      response_json: JSON.stringify({ raw: 'truncated' }),
+      input_tokens: 100,
+      output_tokens: 50,
+      cost_usd: 0.0035,
+    }, db);
+    const pricing = { input_per_million: 10, output_per_million: 50 };
+
+    await expect(stage3Constellations(
+      [job], null, DEFAULT_CONFIG, new CostTracker(pricing),
+      new ApiBudget(0, 0, pricing), false, db,
+    )).rejects.toThrow(/--retry-failed/);
+
+    const retriable = await stage3Constellations(
+      [job], null, DEFAULT_CONFIG, new CostTracker(pricing),
+      new ApiBudget(0, 0, pricing), false, db, true,
+    );
+    expect(retriable.apiCalls).toBe(0);
+    expect(retriable.cacheHits).toBe(0);
+
+    const skipped = await stage3Constellations(
+      [job], null, DEFAULT_CONFIG, new CostTracker(pricing),
+      new ApiBudget(0, 0, pricing), false, db, false, true,
+    );
+    expect(skipped.failedSkips).toBe(1);
+    expect(skipped.apiCalls).toBe(0);
   });
 });

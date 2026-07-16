@@ -3,6 +3,9 @@ import { hashIds } from '../src/utils/hash.js';
 import { timer } from '../src/utils/timer.js';
 import { pLimit } from '../src/utils/concurrency.js';
 import { CostTracker } from '../src/utils/cost-tracker.js';
+import { ApiBudget, PipelineLimitError } from '../src/utils/api-budget.js';
+
+const pricing = { input_per_million: 10, output_per_million: 50 };
 
 describe('hashIds', () => {
   it('produces consistent hash for same ids', () => {
@@ -71,19 +74,17 @@ describe('pLimit', () => {
 
 describe('CostTracker', () => {
   it('tracks total cost', () => {
-    const tracker = new CostTracker();
-    // Haiku: $0.80/M input, $4.00/M output
-    tracker.record('claude-haiku-4-5-20251001', 1_000_000, 100_000, 'test');
+    const tracker = new CostTracker(pricing);
+    tracker.record('configured-model', 1_000_000, 100_000, 'test');
 
     const cost = tracker.totalCost();
-    // 1M input * 0.80/M + 100K output * 4.00/M = 0.80 + 0.40 = 1.20
-    expect(cost).toBeCloseTo(1.20, 2);
+    expect(cost).toBeCloseTo(15, 2);
   });
 
   it('tracks cost by stage', () => {
-    const tracker = new CostTracker();
-    tracker.record('claude-haiku-4-5-20251001', 500_000, 50_000, 'constellations');
-    tracker.record('claude-haiku-4-5-20251001', 200_000, 20_000, 'patterns');
+    const tracker = new CostTracker(pricing);
+    tracker.record('configured-model', 500_000, 50_000, 'constellations');
+    tracker.record('configured-model', 200_000, 20_000, 'patterns');
 
     const byStage = tracker.costByStage();
     expect(byStage['constellations']).toBeGreaterThan(0);
@@ -91,9 +92,24 @@ describe('CostTracker', () => {
     expect(byStage['constellations']).toBeGreaterThan(byStage['patterns']);
   });
 
-  it('handles unknown models gracefully', () => {
-    const tracker = new CostTracker();
-    tracker.record('unknown-model', 1000, 1000, 'test');
-    expect(tracker.totalCost()).toBe(0);
+  it('uses centralized configured pricing for any selected model id', () => {
+    const tracker = new CostTracker(pricing);
+    tracker.record('runtime-model', 1000, 1000, 'test');
+    expect(tracker.totalCost()).toBeCloseTo(0.06, 6);
+  });
+});
+
+describe('ApiBudget', () => {
+  it('enforces the maximum call count', () => {
+    const budget = new ApiBudget(1, 1, pricing);
+    const reservation = budget.reserve(100, 100);
+    budget.recordSuccess(reservation, 50, 50);
+    expect(() => budget.reserve(100, 100)).toThrow(PipelineLimitError);
+  });
+
+  it('rejects a call whose theoretical maximum exceeds the remaining budget', () => {
+    const budget = new ApiBudget(10, 0.01, pricing);
+    expect(() => budget.reserve(1_000, 1_000)).toThrow(/could exceed/);
+    expect(budget.calls).toBe(0);
   });
 });

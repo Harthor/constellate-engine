@@ -46,7 +46,7 @@ export function stage2Neighborhoods(
 
   // --- Intra-cluster neighborhoods ---
   for (const [, ideaIds] of clusters) {
-    if (ideaIds.length <= 30) {
+    if (ideaIds.length <= config.max_neighborhood_size) {
       if (ideaIds.length >= 3) {
         neighborhoods.push(ideaIds);
       }
@@ -63,7 +63,10 @@ export function stage2Neighborhoods(
         }))
         .sort((a, b) => a.dist - b.dist);
 
-      const chunkSize = 22;
+      const chunkSize = Math.min(
+        config.max_neighborhood_size,
+        Math.max(config.min_neighborhood_size, 22),
+      );
       for (let i = 0; i < withDist.length; i += chunkSize) {
         const chunk = withDist.slice(i, i + chunkSize).map((x) => x.id);
         if (chunk.length >= config.min_neighborhood_size || i === 0) {

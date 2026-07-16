@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDb, loadIdeas, bulkInsertIdeas, insertIdea, cacheEmbeddings, getCachedEmbeddings, clearCache } from '../src/db/database.js';
+import { createDb, loadIdeas, bulkInsertIdeas, insertIdea, cacheEmbeddings, getCachedEmbeddings, clearCache, cacheApiCall, getCachedApiCall } from '../src/db/database.js';
 import Database from 'better-sqlite3';
 
 describe('Database', () => {
@@ -105,6 +105,49 @@ describe('Database', () => {
       expect(getCachedEmbeddings('test', db).size).toBe(0);
       // Ideas should still be there
       expect(loadIdeas(db)).toHaveLength(1);
+    });
+  });
+
+  describe('API call resume cache', () => {
+    it('stores valid empty responses with model, tokens, cost, and timestamp', () => {
+      cacheApiCall({
+        input_hash: 'input-hash',
+        stage: 'constellations',
+        scope_hash: 'scope-hash',
+        model: 'runtime-model',
+        prompt_version: 'prompt-v1',
+        status: 'valid',
+        response_json: JSON.stringify({ constellations: [] }),
+        input_tokens: 123,
+        output_tokens: 4,
+        cost_usd: 0.00143,
+      }, db);
+
+      const cached = getCachedApiCall('input-hash', 'runtime-model', 'prompt-v1', db);
+      expect(cached?.status).toBe('valid');
+      expect(cached?.input_tokens).toBe(123);
+      expect(cached?.created_at).toBeTruthy();
+      expect(JSON.parse(cached!.response_json)).toEqual({ constellations: [] });
+    });
+
+    it('keeps every paid retry in the append-only attempts ledger', () => {
+      const base = {
+        input_hash: 'retry-input',
+        stage: 'constellations',
+        scope_hash: 'retry-scope',
+        model: 'runtime-model',
+        prompt_version: 'prompt-v1',
+        response_json: JSON.stringify({ constellations: [] }),
+        input_tokens: 100,
+        output_tokens: 50,
+        cost_usd: 0.0035,
+      } as const;
+      cacheApiCall({ ...base, status: 'invalid' }, db);
+      cacheApiCall({ ...base, status: 'valid' }, db);
+
+      const attempts = db.prepare('SELECT status FROM api_call_attempts ORDER BY id').all() as Array<{ status: string }>;
+      expect(attempts.map((attempt) => attempt.status)).toEqual(['invalid', 'valid']);
+      expect(getCachedApiCall('retry-input', 'runtime-model', 'prompt-v1', db)?.status).toBe('valid');
     });
   });
 });

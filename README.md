@@ -1,167 +1,181 @@
 # Constellate Engine
 
-> See [constellate.fyi](https://constellate.fyi) for the hosted product and [constellate-web](https://github.com/Harthor/constellate-web) for the frontend source.
+Local pipeline for [Constellate](https://constellate.fyi). It ingests technology ideas, deduplicates and normalizes them, computes TF-IDF embeddings, clusters them, forms neighborhoods, and optionally asks Claude to identify constellations and emergent patterns. Results are cached in SQLite and exported as `output.json` for [constellate-web](https://github.com/Harthor/constellate-web).
 
-Discover non-obvious patterns across large idea corpora using AI-powered constellation detection.
+There is no permanent backend. The engine runs locally or as a manually invoked batch job; the web repository is a static site.
 
-Constellate takes a collection of ideas/projects/concepts, clusters them by semantic similarity using TF-IDF embeddings, forms neighborhoods of related ideas, and then uses Claude to find **constellations** — subsets of 3-6 ideas that together reveal something non-obvious that none reveals alone.
+## Safety defaults
 
-## How It Works
+The default configuration cannot spend money:
 
-The pipeline has 4 stages:
+```dotenv
+ANTHROPIC_MODEL=claude-fable-5
+ANTHROPIC_MAX_OUTPUT_TOKENS=1024
+ANTHROPIC_EFFORT=low
+ANTHROPIC_MAX_BUDGET_USD=0
+ANTHROPIC_MAX_CALLS=0
+ANTHROPIC_CONCURRENCY=1
+ANTHROPIC_INPUT_USD_PER_MILLION=10
+ANTHROPIC_OUTPUT_USD_PER_MILLION=50
+```
 
-1. **Embeddings + Clustering** — TF-IDF vectors (zero cost, zero dependencies) fed into k-means to group similar ideas
-2. **Neighborhood Formation** — Intra-cluster and cross-cluster neighborhoods for Claude to analyze
-3. **Constellation Discovery** — Claude examines each neighborhood for 5 types of non-obvious patterns:
-   - **Triangulation**: 3 ideas that from different angles illuminate the same deep phenomenon
-   - **Spectrum**: Ideas representing positions on the same axis of debate
-   - **Chain**: Logical/causal progression where each enables the next
-   - **Convergence**: Different domains inadvertently pointing to the same deep problem
-   - **Absence**: What's conspicuously missing given the neighborhood's structure
-4. **Emergent Patterns** — Claude looks at each cluster as a whole for undercurrents and paradigm shifts
+`ANTHROPIC_API_KEY` is read only from the process environment and is never written, printed, cached, or included in output. Do not put a real key in a versioned file.
 
-Everything is cached in SQLite. Re-running with the same data costs $0.
+The Fable 5 model ID and [standard API price documented by Anthropic](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) are USD 10 per million input tokens and USD 50 per million output tokens. Adaptive thinking is always enabled for Fable 5, so the engine selects low effort and a 1,024-token hard output cap for these bounded JSON tasks. Fable 5 may return `stop_reason: "refusal"`; Constellate records that response and stops without automatically falling back to another paid model. Anthropic currently documents a 30-day API retention requirement for Fable 5, so do not send material that requires zero-data-retention treatment.
 
-## Quick Start
+## Install and verify
 
 ```bash
-# Install
-npm install
-
-# Ingest ideas from JSON
-npx tsx cli/index.ts ingest examples/sample-ideas.json
-
-# Run the pipeline (requires API key)
-ANTHROPIC_API_KEY=sk-... npx tsx cli/index.ts run
-
-# Or run the demo (works without API key for stages 1-2)
-npx tsx examples/demo.ts
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
 
-## CLI Commands
+## Ingest data
+
+The CLI accepts either a JSON array of ideas or a pipeline-shaped object whose `ideas` field is an object keyed by ID. This imports the real dataset currently used by the frontend:
 
 ```bash
-constellate run              # Run the full pipeline
-  --force                    # Ignore cache, recompute everything
-  --clusters <n>             # Number of clusters (default: 15)
-  --min-score <n>            # Min constellation score 1-10 (default: 6)
-  --model <model>            # Claude model for discovery
-  --embedder <name>          # Embedder (default: tfidf)
-  --output <path>            # Output JSON path (default: output.json)
-
-constellate ingest <file>    # Import ideas from JSON
-constellate scrape [source]  # Scrape ideas (all sources if none specified)
-constellate stats            # Show database statistics
-constellate clear-cache      # Clear all cached results
+npm run pipeline -- ingest ../constellate-web/public/data.json
+npm run pipeline -- stats
 ```
 
-## Input Format
+URLs, whitespace, and source names are normalized. Repeated URLs, and source/title duplicates without URLs, are skipped.
 
-Ideas JSON — array of objects:
+## Zero-cost dry run
 
-```json
-[
-  {
-    "title": "Project Name",
-    "description": "What it does and why it matters",
-    "source": "github-trending",
-    "url": "https://github.com/...",
-    "category": "devtools",
-    "stack": "typescript,react"
-  }
-]
+Run the 30-idea, 50-idea, and full-dataset scenarios:
+
+```bash
+npm run dry-run
 ```
 
-## Web Demo
+Run one scenario:
 
-A standalone HTML visualizer is included in `web-demo/` for quick local inspection. Open `web-demo/index.html` via a local HTTP server. For the full frontend, see [constellate-web](https://github.com/Harthor/constellate-web).
+```bash
+npm run pipeline -- dry-run --limit 40
+```
+
+Dry-run executes the local stages and validates source data, embeddings, clustering, neighborhoods, cache state, token estimates, cost estimates, and output shape. It creates no Anthropic client, makes zero provider calls, and does not overwrite `output.json`.
+
+Each preflight reports:
+
+- documents, distinct sources, clusters, and neighborhoods;
+- constellation and pattern jobs;
+- estimated calls and calls planned under the cap;
+- reusable paid-call cache entries;
+- expected and conservative-maximum input tokens;
+- maximum output tokens;
+- expected cost and maximum theoretical cost;
+- configured budget and call limits.
+
+## Minimal paid test — do not run without reviewing preflight
+
+First place the key in the shell environment without writing it to the repository. Then run:
+
+```bash
+ANTHROPIC_MODEL=claude-fable-5 \
+ANTHROPIC_MAX_OUTPUT_TOKENS=1024 \
+ANTHROPIC_EFFORT=low \
+ANTHROPIC_MAX_BUDGET_USD=0.25 \
+ANTHROPIC_MAX_CALLS=2 \
+ANTHROPIC_CONCURRENCY=1 \
+npm run pipeline -- run \
+  --limit 40 \
+  --output output-fable-test.json
+```
+
+The command displays the full preflight and asks you to type `YES`. For non-interactive automation, `--yes` is required explicitly. The budget controller reserves the conservative maximum cost before every individual attempt, counts retries against `max-calls`, and refuses any request that could cross the budget.
+
+Use a separate output file for tests. Do not replace production data until the result has been reviewed.
+
+## Cache and safe resume
+
+SQLite stores:
+
+- normalized ideas;
+- TF-IDF embeddings;
+- materialized constellations and patterns;
+- one `api_call_cache` ledger row after every successful paid response, including empty, invalid, and refused responses.
+
+The append-only attempt ledger contains the input hash, stage, scope hash, model, prompt version, response, input/output token counts, calculated cost, status, and timestamp. A separate latest-response cache supports resume. Re-running the same input/model/prompt reuses valid results. Invalid or refused cached responses block automatic retries; use `--retry-failed` only after deliberate review, or `--skip-failed` to omit a reviewed failure without paying again. `--force` ignores every valid cache too and can spend substantially more.
+
+## Manual data publication
+
+After reviewing a real `output.json`:
+
+```bash
+npm run publish-data -- --web-dir ../constellate-web
+```
+
+Or select a candidate explicitly:
+
+```bash
+npm run publish-data -- \
+  --input output-fable-test.json \
+  --web-dir ../constellate-web
+```
+
+The command validates the output schema, creates a timestamped backup under `.backups/`, copies the candidate to `constellate-web/public/data.json`, runs the frontend build, rolls back on failure, and prints a count/size diff. It never commits or pushes.
+
+Use `--preview-only` to keep the generated frontend `out/` build while automatically restoring the current `public/data.json` after a successful build.
+
+## Batch source ingestion
+
+Nine scrapers are included: GitHub Trending, Hacker News, arXiv, Product Hunt, Y Combinator, BetaList, Dev.to, Papers With Code, and Hugging Face.
+
+```bash
+npm run pipeline -- scrape
+npm run pipeline -- scrape hn
+```
+
+`PRODUCTHUNT_TOKEN` is optional. `scripts/weekly-run.ts` is only a batch script; this repository does not configure a weekly scheduler. With the default zero budget it performs a dry run and leaves all output files untouched. A non-interactive paid batch additionally requires explicit `--yes`.
+
+## Manual weekly refresh
+
+The static website is updated from a versioned data snapshot; it does not need a permanent backend. The manual refresh flow is:
+
+```bash
+# 1. Refresh sources and estimate the current corpus for USD 0.
+npm run weekly-run
+
+# 2. After reviewing the preflight, run with a process-only API key,
+#    explicit non-zero limits, and --yes.
+ANTHROPIC_MAX_BUDGET_USD=4.75 \
+ANTHROPIC_MAX_CALLS=50 \
+npm run weekly-run -- --yes
+
+# 3. Review and publish the exact dated candidate printed by step 2.
+npm run publish-data -- --input runs/constellate-<timestamp>.json --web-dir ../constellate-web
+```
+
+Every paid batch saves both `output.json` and an immutable local file under `runs/`. The snapshot embeds `metadata.generated_at`, so the frontend can show when the analysis actually ran instead of relying on a filesystem copy date. Use `--skip-scrape` when resuming the same already-refreshed corpus. Do not normally use `--force`: valid cached calls make a resume free and safe. After reviewing a failed response, `--retry-failed` retries only failed entries while preserving valid work.
+
+To materialize a dated snapshot from already-paid valid cache entries without making any provider call, keep the default zero budget and run:
+
+```bash
+npm run weekly-run -- --skip-scrape --skip-failed --save-cache-snapshot
+```
+
+The snapshot metadata records how many reviewed failures were skipped.
 
 ## Architecture
 
-```
-src/
-  types/          — Domain types, pricing tables
-  db/             — SQLite schema + data layer with caching
-  embeddings/     — Embedder interface + TF-IDF implementation
-  pipeline/       — 4-stage orchestration
-  prompts/        — Claude prompt templates (versioned)
-  sources/        — Source scraper interface (bring your own)
-  utils/          — Retry, concurrency, cost tracking, hashing
-cli/              — Commander-based CLI
-web-demo/         — Standalone HTML visualizer (for quick local inspection)
-examples/         — Sample dataset + demo script
-tests/            — Vitest test suite
-```
-
-## Custom Embedders
-
-TF-IDF is the default (zero cost, good enough for <1000 ideas). For larger corpora, implement the `Embedder` interface:
-
-```typescript
-import type { Embedder, EmbeddingResult } from 'constellate-engine';
-
-class MyEmbedder implements Embedder {
-  readonly model = 'my-embedder-v1';
-
-  async embed(documents: string[]): Promise<EmbeddingResult> {
-    // Call OpenAI, Voyage, Cohere, etc.
-    return { vectors, dimensions };
-  }
-}
-```
-
-## Cost Control
-
-- Default budget: $5.00 per run
-- TF-IDF embeddings: $0 (local)
-- All Claude API calls are cached by neighborhood hash + prompt version
-- Re-running the same dataset is free after first run
-- Cost tracked per stage in pipeline output
-
-## Sources
-
-Constellate ships with 9 built-in scrapers:
-
-GitHub Trending, Hacker News, arXiv (CS.AI), Product Hunt, Y Combinator, BetaList, Dev.to, Papers With Code, Hugging Face.
-
-Reddit and Indie Hackers are **not included** in the open-source release due to ToS constraints. See [docs/custom-sources.md](docs/custom-sources.md) for guidance on adding your own sources, including Reddit with OAuth2.
-
-```bash
-# Scrape all sources
-npx tsx cli/index.ts scrape
-
-# Scrape a specific source
-npx tsx cli/index.ts scrape github
-```
-
-## Weekly Pipeline
-
-Run the full scrape → pipeline → export flow:
-
-```bash
-ANTHROPIC_API_KEY=sk-... npx tsx scripts/weekly-run.ts
-```
-
-To generate a DB compatible with the [constellate.fyi](https://constellate.fyi) deployment:
-
-```bash
-npx tsx scripts/export-landing-db.ts [output-path]
-```
-
-## Development
-
-```bash
-npm run typecheck    # Type checking
-npm test             # Run tests
-npm run test:watch   # Watch mode
+```text
+src/config.ts             centralized model, pricing, and hard limits
+src/sources/              source ingestion
+src/embeddings/           local TF-IDF vectors
+src/pipeline/             clustering, neighborhoods, preflight, API stages
+src/prompts/              versioned prompts
+src/db/                   SQLite schema, cache, and resume ledger
+src/utils/                concurrency, retries, hashing, and budget control
+src/output-schema.ts      output validation
+src/publish-data.ts       guarded frontend publication
+cli/                      interactive command line
 ```
 
 ## License
 
-This project is source-available under the Business Source License 1.1 (BSL 1.1).
-
-- **Change Date**: April 12, 2030
-- **Change License**: Apache License 2.0
-- **Additional Use Grant**: You may use the Licensed Work for any purpose other than operating a commercial hosted service that competes with constellate.fyi.
-
-After the Change Date, the code becomes available under Apache 2.0. See the `LICENSE` file for the full text.
+Business Source License 1.1. See `LICENSE`.

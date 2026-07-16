@@ -1,59 +1,80 @@
 /**
- * Weekly pipeline: scrape all sources → run constellation pipeline → export for landing.
+ * Weekly pipeline: scrape all sources → run constellation pipeline → save a dated snapshot.
  *
- * Usage:
- *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/weekly-run.ts
+ * Zero-cost usage:
+ *   npm run weekly-run
  *
- * This is the script you'd run via cron or scheduled task.
+ * Paid usage still requires non-zero environment limits, a process-only API
+ * key, and the explicit --yes flag.
  */
 
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { scrapeAll } from '../src/sources/scrapers.js';
-import { getDb, bulkInsertIdeas, closeDb } from '../src/db/database.js';
+import { bulkInsertIdeas, closeDb } from '../src/db/database.js';
 import { runPipeline } from '../src/pipeline/index.js';
+import { isDryRunConfig, loadPipelineConfig } from '../src/config.js';
+
+function optionValue(name: string): string | undefined {
+  const index = process.argv.indexOf(name);
+  if (index === -1) return undefined;
+  const value = process.argv[index + 1];
+  if (!value || value.startsWith('--')) throw new Error(`${name} requires a value.`);
+  return value;
+}
 
 async function main() {
   const startTime = Date.now();
   console.log('=== CONSTELLATE WEEKLY RUN ===');
   console.log(`Started: ${new Date().toISOString()}\n`);
 
-  // Step 1: Scrape all sources
-  console.log('--- Step 1: Scraping sources ---');
-  const results = await scrapeAll();
   let totalNew = 0;
   let totalFetched = 0;
-
-  for (const r of results) {
-    if (r.error) {
-      console.log(`  [${r.source}] ERROR: ${r.error}`);
-      continue;
+  if (process.argv.includes('--skip-scrape')) {
+    console.log('--- Step 1: Source refresh skipped explicitly ---\n');
+  } else {
+    console.log('--- Step 1: Scraping sources ---');
+    const results = await scrapeAll();
+    for (const r of results) {
+      if (r.error) {
+        console.log(`  [${r.source}] ERROR: ${r.error}`);
+        continue;
+      }
+      const count = bulkInsertIdeas(r.ideas);
+      totalNew += count;
+      totalFetched += r.ideas.length;
+      console.log(`  [${r.source}] ${r.ideas.length} fetched, ${count} new`);
     }
-    const count = bulkInsertIdeas(r.ideas);
-    totalNew += count;
-    totalFetched += r.ideas.length;
-    console.log(`  [${r.source}] ${r.ideas.length} fetched, ${count} new`);
-  }
-  console.log(`  Total: ${totalFetched} fetched, ${totalNew} new\n`);
-
-  if (totalNew === 0) {
-    console.log('No new ideas found. Skipping pipeline run.');
-    closeDb();
-    return;
+    console.log(`  Total: ${totalFetched} fetched, ${totalNew} new\n`);
   }
 
   // Step 2: Run pipeline
   console.log('--- Step 2: Running pipeline ---');
-  const result = await runPipeline({
-    config: {
-      num_clusters: 15,
-      max_total_neighborhoods: 25,
-    },
-  });
+  const config = loadPipelineConfig();
+  const dryRun = isDryRunConfig(config);
+  const saveCacheSnapshot = process.argv.includes('--save-cache-snapshot');
+  const yes = process.argv.includes('--yes');
+  const forceRecompute = process.argv.includes('--force');
+  const retryFailed = process.argv.includes('--retry-failed');
+  const skipFailed = process.argv.includes('--skip-failed');
+  const result = await runPipeline({ dryRun, yes, forceRecompute, retryFailed, skipFailed });
 
-  // Step 3: Save output
-  const outputPath = 'output.json';
-  writeFileSync(outputPath, JSON.stringify(result, null, 2));
-  console.log(`\nOutput saved to ${outputPath}`);
+  // Step 3: Save latest output plus an immutable, dated local snapshot.
+  if (!dryRun || saveCacheSnapshot) {
+    const outputPath = resolve(optionValue('--output') ?? 'output.json');
+    const snapshotName = `constellate-${result.metadata.generated_at!
+      .replace(/[:.]/g, '-')}.json`;
+    const snapshotPath = resolve('runs', snapshotName);
+    const serialized = JSON.stringify(result, null, 2);
+    mkdirSync(dirname(outputPath), { recursive: true });
+    mkdirSync(dirname(snapshotPath), { recursive: true });
+    writeFileSync(outputPath, serialized);
+    if (snapshotPath !== outputPath) writeFileSync(snapshotPath, serialized);
+    console.log(`\n${dryRun ? 'Cache-only' : 'Latest'} output saved to ${outputPath}`);
+    console.log(`Dated snapshot saved to ${snapshotPath}`);
+  } else {
+    console.log('\nDry run complete. Existing outputs and dated snapshots were not changed.');
+  }
 
   // Step 4: Summary
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -63,7 +84,9 @@ async function main() {
   console.log(`Patterns: ${result.patterns.length}`);
   console.log(`Cost: $${result.metadata.estimated_cost_usd.toFixed(4)}`);
   console.log(`Total time: ${elapsed}s`);
-  console.log(`\nRun 'npx tsx scripts/export-landing-db.ts' to generate landing-compatible DB`);
+  if (!dryRun || saveCacheSnapshot) {
+    console.log("\nReview the snapshot, then run 'npm run publish-data -- --input <snapshot>' to publish it.");
+  }
 
   closeDb();
 }

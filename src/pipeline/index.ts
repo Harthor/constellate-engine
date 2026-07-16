@@ -1,123 +1,143 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { PipelineConfig, PipelineResult, Embedder } from '../types/index.js';
+import type {
+  PipelineConfig,
+  PipelineResult,
+  Embedder,
+  PreflightReport,
+} from '../types/index.js';
+import { DEFAULT_CONFIG, isDryRunConfig, loadPipelineConfig } from '../config.js';
 import { getDb, loadIdeas } from '../db/database.js';
 import { createEmbedder } from '../embeddings/embedder.js';
 import { stage1Embeddings } from './stage1-embeddings.js';
 import { stage2Neighborhoods } from './stage2-neighborhoods.js';
 import { stage3Constellations } from './stage3-constellations.js';
 import { stage4Patterns } from './stage4-patterns.js';
+import { buildConstellationJobs, buildPatternJobs } from './inputs.js';
+import { buildPreflightReport, formatPreflightReport } from './preflight.js';
 import { CostTracker } from '../utils/cost-tracker.js';
+import { ApiBudget } from '../utils/api-budget.js';
 import { timer } from '../utils/timer.js';
+import { validatePipelineResult } from '../output-schema.js';
 import Database from 'better-sqlite3';
 
-export const DEFAULT_CONFIG: PipelineConfig = {
-  num_clusters: 30,
-  max_neighborhood_size: 30,
-  min_neighborhood_size: 20,
-  max_cross_cluster_neighborhoods: 10,
-  max_total_neighborhoods: 50,
-  discovery_model: 'claude-sonnet-4-5-20250929',
-  patterns_model: 'claude-opus-4-5-20251101',
-  min_constellation_score: 6,
-  discovery_concurrency: 5,
-  cost_budget_usd: 15.0,
-};
+export { DEFAULT_CONFIG } from '../config.js';
 
 export interface RunOptions {
   config?: Partial<PipelineConfig>;
   embedder?: Embedder;
   forceRecompute?: boolean;
+  retryFailed?: boolean;
+  skipFailed?: boolean;
   db?: Database.Database;
-  apiKey?: string;
+  limit?: number;
+  dryRun?: boolean;
+  yes?: boolean;
+  confirmSpend?: (report: PreflightReport) => Promise<boolean>;
+  onPreflight?: (report: PreflightReport) => void;
 }
 
 export async function runPipeline(options: RunOptions = {}): Promise<PipelineResult> {
   const totalElapsed = timer();
-  const config: PipelineConfig = { ...DEFAULT_CONFIG, ...options.config };
+  const config = loadPipelineConfig(process.env, options.config);
+  const dryRun = options.dryRun === true || isDryRunConfig(config);
   const db = options.db || getDb();
-  const costTracker = new CostTracker();
-
-  const apiKey = options.apiKey || process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is required. Set it as an environment variable or pass it via options.');
-  }
-  const client = new Anthropic({ apiKey });
-
+  const pricing = {
+    input_per_million: config.input_usd_per_million,
+    output_per_million: config.output_usd_per_million,
+  };
+  const costTracker = new CostTracker(pricing);
   const embedder = options.embedder || (await createEmbedder('tfidf'));
 
   console.log('\n========== CONSTELLATE PIPELINE START ==========');
-  console.log(`[config] Clusters: ${config.num_clusters}`);
-  console.log(`[config] Max neighborhoods: ${config.max_total_neighborhoods}`);
-  console.log(`[config] Discovery model: ${config.discovery_model}`);
-  console.log(`[config] Patterns model: ${config.patterns_model}`);
-  console.log(`[config] Min score: ${config.min_constellation_score}`);
+  console.log(`[config] Mode: ${dryRun ? 'dry-run' : 'paid'}`);
+  console.log(`[config] Model: ${config.model}`);
+  console.log(`[config] Max output tokens: ${config.max_output_tokens}`);
+  console.log(`[config] Effort: ${config.effort}`);
+  console.log(`[config] Hard limits: USD ${config.max_budget_usd.toFixed(4)}, ${config.max_calls} calls`);
+  console.log(`[config] Concurrency: ${config.concurrency}`);
   console.log(`[config] Embedder: ${embedder.model}`);
 
-  // Load ideas
-  const ideas = loadIdeas(db);
-  console.log(`[pipeline] ${ideas.length} ideas loaded`);
-
+  const allIdeas = loadIdeas(db);
+  const ideas = options.limit ? allIdeas.slice(0, options.limit) : allIdeas;
+  console.log(`[pipeline] ${ideas.length} ideas loaded${options.limit ? ` (limit ${options.limit})` : ''}`);
   if (ideas.length < 3) {
     throw new Error(`Need at least 3 ideas to run the pipeline. Found ${ideas.length}.`);
   }
 
-  const ideaMap = new Map(ideas.map((i) => [i.id, i]));
-
-  // Stage 1: Embeddings + clustering
-  const s1 = await stage1Embeddings(ideas, embedder, config, options.forceRecompute || false, db);
-
-  // Stage 2: Neighborhood formation
+  const ideaMap = new Map(ideas.map((idea) => [idea.id, idea]));
+  const forceRecompute = options.forceRecompute || false;
+  const s1 = await stage1Embeddings(ideas, embedder, config, forceRecompute, db);
   const s2 = stage2Neighborhoods(s1.clusters, s1.embeddings, config);
-
-  // Stage 3: Constellation discovery
-  const s3 = await stage3Constellations(
-    s2.neighborhoods,
-    ideaMap,
-    client,
+  const constellationJobs = buildConstellationJobs(s2.neighborhoods, ideaMap, config);
+  const patternJobs = buildPatternJobs(s1.clusters, ideaMap, config);
+  const jobs = [...constellationJobs, ...patternJobs];
+  const report = buildPreflightReport({
+    jobs,
+    documents: ideas.length,
+    sources: new Set(ideas.map((idea) => idea.source)).size,
+    clusters: s1.clusters.size,
+    neighborhoods: s2.neighborhoods.length,
     config,
-    costTracker,
-    options.forceRecompute || false,
+    dryRun,
+    forceRecompute,
+    skipFailed: options.skipFailed === true,
     db,
-  );
+  });
+  console.log(formatPreflightReport(report));
+  options.onPreflight?.(report);
 
-  // Stage 4: Emergent patterns
-  const s4 = await stage4Patterns(
-    s1.clusters,
-    ideaMap,
-    client,
-    config,
-    costTracker,
-    options.forceRecompute || false,
-    db,
-  );
-
-  // Cost summary
-  const totalCost = costTracker.totalCost();
-  const costByStage = costTracker.costByStage();
-
-  // Count by type
-  const byType: Record<string, number> = {};
-  for (const c of s3.constellations) {
-    byType[c.constellation_type] = (byType[c.constellation_type] || 0) + 1;
+  let client: Anthropic | null = null;
+  if (!dryRun) {
+    if (!options.yes) {
+      if (!options.confirmSpend || !(await options.confirmSpend(report))) {
+        throw new Error('Paid run cancelled: explicit confirmation was not received.');
+      }
+    }
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is required for a paid run.');
+    client = new Anthropic({ apiKey });
   }
 
+  const budget = new ApiBudget(config.max_calls, config.max_budget_usd, pricing);
+  const s3 = await stage3Constellations(
+    constellationJobs,
+    client,
+    config,
+    costTracker,
+    budget,
+    forceRecompute,
+    db,
+    options.retryFailed,
+    options.skipFailed,
+  );
+  const s4 = await stage4Patterns(
+    patternJobs,
+    client,
+    config,
+    costTracker,
+    budget,
+    forceRecompute,
+    db,
+    options.retryFailed,
+    options.skipFailed,
+  );
+
+  const totalCost = costTracker.totalCost();
+  const byType: Record<string, number> = {};
+  for (const constellation of s3.constellations) {
+    byType[constellation.constellation_type] =
+      (byType[constellation.constellation_type] || 0) + 1;
+  }
   const totalMs = totalElapsed();
 
   console.log('\n========== PIPELINE COMPLETE ==========');
-  console.log(`[neighborhoods] ${s2.intraCount} intra + ${s2.crossCount} cross = ${s2.neighborhoods.length} total`);
-  console.log(`[constellations] ${s3.constellations.length} found (score >= ${config.min_constellation_score})`);
-  console.log(`[constellations] By type:`, byType);
-  console.log(`[patterns] ${s4.patterns.length} emergent patterns`);
-  console.log(`[cost] Constellations: $${(costByStage['constellations'] || 0).toFixed(4)}`);
-  console.log(`[cost] Patterns: $${(costByStage['patterns'] || 0).toFixed(4)}`);
-  console.log(`[cost] TOTAL: $${totalCost.toFixed(4)}`);
-  if (totalCost > config.cost_budget_usd) {
-    console.warn(`[cost] WARNING: Exceeded budget of $${config.cost_budget_usd}!`);
-  }
-  console.log(`[time] Total: ${totalMs}ms`);
+  console.log(`[mode] ${dryRun ? 'DRY RUN — zero provider calls' : 'PAID RUN'}`);
+  console.log(`[constellations] ${s3.constellations.length} (${s3.cacheHits} cache hits)`);
+  console.log(`[patterns] ${s4.patterns.length} (${s4.cacheHits} cache hits)`);
+  console.log(`[api] ${budget.calls} calls, USD ${totalCost.toFixed(4)} actual`);
+  console.log(`[time] ${totalMs}ms`);
 
-  // Build ideas reference
-  const ideasRef: Record<number, { title: string; source: string; url: string; category: string; description: string }> = {};
+  const ideasRef: PipelineResult['ideas'] = {};
   for (const idea of ideas) {
     ideasRef[idea.id] = {
       title: idea.title,
@@ -128,11 +148,12 @@ export async function runPipeline(options: RunOptions = {}): Promise<PipelineRes
     };
   }
 
-  return {
+  const result: PipelineResult = {
     constellations: s3.constellations,
     patterns: s4.patterns,
     ideas: ideasRef,
     metadata: {
+      generated_at: new Date().toISOString(),
       total_ideas: ideas.length,
       neighborhoods_intra: s2.intraCount,
       neighborhoods_cross: s2.crossCount,
@@ -141,12 +162,21 @@ export async function runPipeline(options: RunOptions = {}): Promise<PipelineRes
       constellations_by_type: byType,
       constellation_cache_hits: s3.cacheHits,
       constellation_api_calls: s3.apiCalls,
+      constellation_failed_skips: s3.failedSkips,
       pattern_cache_hits: s4.cacheHits,
       pattern_api_calls: s4.apiCalls,
+      pattern_failed_skips: s4.failedSkips,
       estimated_cost_usd: totalCost,
       elapsed_ms: totalMs,
     },
   };
+
+  const validation = validatePipelineResult(result);
+  if (!validation.success) {
+    throw new Error(`Pipeline produced invalid output: ${validation.errors.join('; ')}`);
+  }
+  console.log('[schema] Output shape validated');
+  return result;
 }
 
 export { DEFAULT_CONFIG as defaultConfig };

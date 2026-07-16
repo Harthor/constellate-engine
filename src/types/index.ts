@@ -65,14 +65,20 @@ export interface PipelineConfig {
   min_neighborhood_size: number;
   max_cross_cluster_neighborhoods: number;
   max_total_neighborhoods: number;
-  discovery_model: string;
-  patterns_model: string;
+  model: string;
   min_constellation_score: number;
-  discovery_concurrency: number;
-  cost_budget_usd: number;
+  max_output_tokens: number;
+  effort: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  max_budget_usd: number;
+  max_calls: number;
+  concurrency: number;
+  input_usd_per_million: number;
+  output_usd_per_million: number;
 }
 
 export interface PipelineMetadata {
+  /** ISO-8601 timestamp for the analysis that produced this snapshot. */
+  generated_at?: string;
   total_ideas: number;
   neighborhoods_intra: number;
   neighborhoods_cross: number;
@@ -81,8 +87,10 @@ export interface PipelineMetadata {
   constellations_by_type: Record<string, number>;
   constellation_cache_hits: number;
   constellation_api_calls: number;
+  constellation_failed_skips?: number;
   pattern_cache_hits: number;
   pattern_api_calls: number;
+  pattern_failed_skips?: number;
   estimated_cost_usd: number;
   elapsed_ms: number;
 }
@@ -92,6 +100,27 @@ export interface PipelineResult {
   patterns: EmergentPattern[];
   ideas: Record<number, { title: string; source: string; url: string; category: string; description: string }>;
   metadata: PipelineMetadata;
+}
+
+export interface PreflightReport {
+  documents: number;
+  sources: number;
+  clusters: number;
+  neighborhoods: number;
+  constellation_jobs: number;
+  pattern_jobs: number;
+  calls_estimated: number;
+  calls_planned: number;
+  cache_reusable: number;
+  cache_skipped_failed: number;
+  input_tokens_estimated: number;
+  input_tokens_maximum: number;
+  output_tokens_maximum: number;
+  expected_cost_usd: number;
+  maximum_theoretical_cost_usd: number;
+  configured_budget_usd: number;
+  configured_max_calls: number;
+  dry_run: boolean;
 }
 
 // ─── Embeddings ─────────────────────────────────────────────────────
@@ -128,14 +157,3 @@ export interface ModelPricing {
   input_per_million: number;
   output_per_million: number;
 }
-
-// Model IDs include date snapshots. If Anthropic releases new snapshots,
-// add them here or cost tracking will silently report $0 for unknown models.
-// Check https://docs.anthropic.com/en/docs/about-claude/models for current IDs.
-export const MODEL_PRICING: Record<string, ModelPricing> = {
-  'claude-haiku-4-5-20251001': { input_per_million: 0.80, output_per_million: 4.00 },
-  'claude-sonnet-4-5-20250929': { input_per_million: 3.00, output_per_million: 15.00 },
-  'claude-sonnet-4-6-20260514': { input_per_million: 3.00, output_per_million: 15.00 },
-  'claude-opus-4-5-20251101': { input_per_million: 15.00, output_per_million: 75.00 },
-  'claude-opus-4-6-20260409': { input_per_million: 15.00, output_per_million: 75.00 },
-};

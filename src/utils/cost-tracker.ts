@@ -1,6 +1,19 @@
-import { MODEL_PRICING } from '../types/index.js';
+import type { ModelPricing } from '../types/index.js';
+
+export function calculateCost(
+  inputTokens: number,
+  outputTokens: number,
+  pricing: ModelPricing,
+): number {
+  return (
+    (inputTokens / 1_000_000) * pricing.input_per_million +
+    (outputTokens / 1_000_000) * pricing.output_per_million
+  );
+}
 
 export class CostTracker {
+  constructor(private readonly pricing: ModelPricing) {}
+
   private entries: Array<{
     model: string;
     input_tokens: number;
@@ -15,11 +28,7 @@ export class CostTracker {
   totalCost(): number {
     let total = 0;
     for (const e of this.entries) {
-      const pricing = MODEL_PRICING[e.model];
-      if (!pricing) continue;
-      total +=
-        (e.input_tokens / 1_000_000) * pricing.input_per_million +
-        (e.output_tokens / 1_000_000) * pricing.output_per_million;
+      total += calculateCost(e.input_tokens, e.output_tokens, this.pricing);
     }
     return total;
   }
@@ -27,11 +36,7 @@ export class CostTracker {
   costByStage(): Record<string, number> {
     const result: Record<string, number> = {};
     for (const e of this.entries) {
-      const pricing = MODEL_PRICING[e.model];
-      if (!pricing) continue;
-      const cost =
-        (e.input_tokens / 1_000_000) * pricing.input_per_million +
-        (e.output_tokens / 1_000_000) * pricing.output_per_million;
+      const cost = calculateCost(e.input_tokens, e.output_tokens, this.pricing);
       result[e.stage] = (result[e.stage] || 0) + cost;
     }
     return result;
