@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { hashIds } from '../src/utils/hash.js';
 import { timer } from '../src/utils/timer.js';
 import { pLimit } from '../src/utils/concurrency.js';
+import { withRetry } from '../src/utils/retry.js';
 import { CostTracker } from '../src/utils/cost-tracker.js';
 import { ApiBudget, PipelineLimitError } from '../src/utils/api-budget.js';
 
@@ -111,5 +112,74 @@ describe('ApiBudget', () => {
     const budget = new ApiBudget(10, 0.01, pricing);
     expect(() => budget.reserve(1_000, 1_000)).toThrow(/could exceed/);
     expect(budget.calls).toBe(0);
+  });
+});
+
+describe('withRetry', () => {
+  const failTimes = (times: number, error: unknown, result = 'ok') => {
+    let calls = 0;
+    return {
+      fn: async () => {
+        calls++;
+        if (calls <= times) throw error;
+        return result;
+      },
+      calls: () => calls,
+    };
+  };
+
+  it('retries 429 and eventually succeeds', async () => {
+    const f = failTimes(2, { status: 429 });
+    await expect(withRetry(f.fn, 3, 1)).resolves.toBe('ok');
+    expect(f.calls()).toBe(3);
+  });
+
+  it.each([500, 502, 503, 529])('retries transient HTTP %i', async (status) => {
+    const f = failTimes(1, { status });
+    await expect(withRetry(f.fn, 2, 1)).resolves.toBe('ok');
+    expect(f.calls()).toBe(2);
+  });
+
+  it('retries network errors without a status (ECONNRESET)', async () => {
+    const err = Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' });
+    const f = failTimes(1, err);
+    await expect(withRetry(f.fn, 2, 1)).resolves.toBe('ok');
+    expect(f.calls()).toBe(2);
+  });
+
+  it('retries network error codes nested under cause', async () => {
+    const err = new Error('fetch failed');
+    (err as Error & { cause?: unknown }).cause = { code: 'ETIMEDOUT' };
+    const f = failTimes(1, err);
+    await expect(withRetry(f.fn, 2, 1)).resolves.toBe('ok');
+    expect(f.calls()).toBe(2);
+  });
+
+  it('retries the SDK APIConnectionError shape', async () => {
+    const err = new Error('Connection error');
+    err.name = 'APIConnectionError';
+    const f = failTimes(1, err);
+    await expect(withRetry(f.fn, 2, 1)).resolves.toBe('ok');
+    expect(f.calls()).toBe(2);
+  });
+
+  it('does not retry non-transient statuses (400, 401, 404)', async () => {
+    for (const status of [400, 401, 404]) {
+      const f = failTimes(5, { status });
+      await expect(withRetry(f.fn, 3, 1)).rejects.toEqual({ status });
+      expect(f.calls()).toBe(1);
+    }
+  });
+
+  it('does not retry plain application errors', async () => {
+    const f = failTimes(5, new Error('parse failure'));
+    await expect(withRetry(f.fn, 3, 1)).rejects.toThrow('parse failure');
+    expect(f.calls()).toBe(1);
+  });
+
+  it('gives up after maxRetries and rethrows the last error', async () => {
+    const f = failTimes(10, { status: 429 });
+    await expect(withRetry(f.fn, 2, 1)).rejects.toEqual({ status: 429 });
+    expect(f.calls()).toBe(3);
   });
 });

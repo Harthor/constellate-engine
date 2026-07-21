@@ -126,6 +126,11 @@ export async function stage1Embeddings(
     });
 
     const { vectors } = await embedder.embed(docs);
+    if (vectors.length !== docs.length) {
+      throw new Error(
+        `Embedder ${embedder.model} returned ${vectors.length} vectors for ${docs.length} documents; refusing to cluster misaligned embeddings.`,
+      );
+    }
 
     const entries = ideas.map((idea, idx) => ({
       id: idea.id,
@@ -140,7 +145,17 @@ export async function stage1Embeddings(
   }
 
   const ideaIds = ideas.map((i) => i.id);
-  const vecs = ideaIds.map((id) => cachedEmbeddings.get(id)!).filter(Boolean);
+  // A dropped vector here would silently shift every later idea onto the
+  // wrong cluster assignment, so a hole is fatal rather than filtered.
+  const vecs = ideaIds.map((id) => {
+    const vec = cachedEmbeddings.get(id);
+    if (!vec) {
+      throw new Error(
+        `Missing embedding for idea ${id} (model ${embedder.model}); rerun with --force-recompute to rebuild the cache.`,
+      );
+    }
+    return vec;
+  });
 
   const k = Math.min(config.num_clusters, Math.floor(vecs.length / 3));
   const assignments = kmeans(vecs, Math.max(k, 1));

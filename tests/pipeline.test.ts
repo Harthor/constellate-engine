@@ -237,3 +237,48 @@ describe('Pipeline stages 1-2', () => {
     expect(skipped.apiCalls).toBe(0);
   });
 });
+
+describe('stage1 — embedding alignment guards', () => {
+  let db: Database.Database;
+
+  beforeEach(() => {
+    db = createDb(':memory:');
+    bulkInsertIdeas(sampleIdeas, db);
+  });
+
+  afterEach(() => {
+    db.close();
+  });
+
+  it('throws when the embedder returns fewer vectors than documents', async () => {
+    const ideas = loadIdeas(db);
+    // Simulates a partial embedder failure. Before the guard, the missing
+    // vector was silently dropped and every later idea shifted onto the
+    // wrong k-means assignment.
+    const shortEmbedder = {
+      model: 'short_v1',
+      embed: async (docs: string[]) => {
+        const { vectors, dimensions } = await new TfIdfEmbedder().embed(docs);
+        return { vectors: vectors.slice(0, docs.length - 1), dimensions };
+      },
+    };
+
+    await expect(
+      stage1Embeddings(ideas, shortEmbedder, { ...DEFAULT_CONFIG, num_clusters: 3 }, false, db),
+    ).rejects.toThrow(/misaligned embeddings/);
+  });
+
+  it('keeps ids and cluster assignments aligned on a healthy run', async () => {
+    const ideas = loadIdeas(db);
+    const result = await stage1Embeddings(
+      ideas,
+      new TfIdfEmbedder(),
+      { ...DEFAULT_CONFIG, num_clusters: 3 },
+      false,
+      db,
+    );
+
+    const assigned = Array.from(result.clusters.values()).flat().sort((a, b) => a - b);
+    expect(assigned).toEqual(ideas.map((i) => i.id).sort((a, b) => a - b));
+  });
+});
