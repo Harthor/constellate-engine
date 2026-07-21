@@ -1,5 +1,7 @@
 # Constellate Engine
 
+[![CI](https://github.com/Harthor/constellate-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Harthor/constellate-engine/actions/workflows/ci.yml)
+
 Local pipeline for [Constellate](https://constellate.fyi). It ingests technology ideas, deduplicates and normalizes them, computes TF-IDF embeddings, clusters them, forms neighborhoods, and optionally asks Claude to identify constellations and emergent patterns. Results are cached in SQLite and exported as `output.json` for [constellate-web](https://github.com/Harthor/constellate-web).
 
 There is no permanent backend. The engine runs locally or as a manually invoked batch job; the web repository is a static site.
