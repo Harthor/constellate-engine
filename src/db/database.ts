@@ -92,16 +92,40 @@ function ideaFingerprint(idea: Pick<IdeaInput, 'url' | 'source' | 'title'>): str
     : `title:${normalizeWhitespace(idea.source).toLowerCase()}:${normalizeWhitespace(idea.title).toLowerCase()}`;
 }
 
-export function loadIdeas(instance?: Database.Database): IdeaRow[] {
+/**
+ * Loads the corpus, optionally restricted to a rolling window.
+ *
+ * `windowDays` filters on `created_at`, which records when a row was INGESTED,
+ * not when the item was published — the scrapers do not carry the publication
+ * date through. With a weekly cadence the two stay roughly aligned; a skipped
+ * run drops items that are still recent. Pass 0 (or omit) for the whole corpus.
+ */
+export function loadIdeas(
+  instance?: Database.Database,
+  windowDays = 0,
+): IdeaRow[] {
   const d = instance || getDb();
+  if (!Number.isInteger(windowDays) || windowDays < 0) {
+    throw new Error('windowDays must be a non-negative integer.');
+  }
+  const columns = `id, title, description, source, url, category, stack`;
+  const contentFilter = `(description != '' OR title != '')`;
+
+  if (windowDays === 0) {
+    return d
+      .prepare(`SELECT ${columns} FROM ideas WHERE ${contentFilter} ORDER BY id ASC`)
+      .all() as IdeaRow[];
+  }
+
   return d
     .prepare(
-      `SELECT id, title, description, source, url, category, stack
+      `SELECT ${columns}
        FROM ideas
-       WHERE description != '' OR title != ''
+       WHERE ${contentFilter}
+         AND created_at >= datetime('now', ?)
        ORDER BY id ASC`,
     )
-    .all() as IdeaRow[];
+    .all(`-${windowDays} days`) as IdeaRow[];
 }
 
 export function insertIdea(

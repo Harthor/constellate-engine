@@ -29,6 +29,11 @@ function addPipelineOptions(command: Command): Command {
     .option('--force', 'Ignore reusable caches', false)
     .option('--retry-failed', 'Retry only reviewed invalid/refused cache entries', false)
     .option('--skip-failed', 'Skip reviewed invalid/refused entries without retrying', false)
+    .option(
+      '--window-days <n>',
+      'Rolling corpus window in days (0 analyses the full corpus)',
+      String(defaults.corpus_window_days),
+    )
     .option('--clusters <n>', 'Number of clusters', String(defaults.num_clusters))
     .option('--min-score <n>', 'Minimum constellation score', String(defaults.min_constellation_score))
     .option('--model <model>', 'Anthropic model', defaults.model)
@@ -45,6 +50,7 @@ function addPipelineOptions(command: Command): Command {
 
 function configFromOptions(opts: Record<string, string>): Partial<PipelineConfig> {
   return {
+    corpus_window_days: Number(opts.windowDays),
     num_clusters: Number(opts.clusters),
     min_constellation_score: Number(opts.minScore),
     model: opts.model,

@@ -150,4 +150,58 @@ describe('Database', () => {
       expect(getCachedApiCall('retry-input', 'runtime-model', 'prompt-v1', db)?.status).toBe('valid');
     });
   });
+
+  describe('rolling corpus window', () => {
+    // created_at is set explicitly here because it records INGESTION time, and
+    // these cases are exactly about rows ingested at different moments.
+    function seed(title: string, daysAgo: number): void {
+      db.prepare(
+        `INSERT INTO ideas (title, description, source, url, category, stack, created_at)
+         VALUES (?, 'desc', 'test', ?, '', '', datetime('now', ?))`,
+      ).run(title, `https://example.com/${title}`, `-${daysAgo} days`);
+    }
+
+    beforeEach(() => {
+      seed('today', 0);
+      seed('three-days', 3);
+      seed('ten-days', 10);
+      seed('forty-days', 40);
+    });
+
+    it('returns the whole corpus when the window is disabled', () => {
+      expect(loadIdeas(db, 0).map((idea) => idea.title)).toEqual([
+        'today',
+        'three-days',
+        'ten-days',
+        'forty-days',
+      ]);
+      // Omitting the argument must behave the same, so existing callers are safe.
+      expect(loadIdeas(db)).toHaveLength(4);
+    });
+
+    it('keeps only rows ingested inside the window', () => {
+      expect(loadIdeas(db, 7).map((idea) => idea.title)).toEqual(['today', 'three-days']);
+    });
+
+    it('widens with the window length', () => {
+      expect(loadIdeas(db, 30).map((idea) => idea.title)).toEqual([
+        'today',
+        'three-days',
+        'ten-days',
+      ]);
+    });
+
+    it('still excludes rows with no title and no description', () => {
+      db.prepare(
+        `INSERT INTO ideas (title, description, source, url, category, stack, created_at)
+         VALUES ('', '', 'test', 'https://example.com/empty', '', '', datetime('now'))`,
+      ).run();
+      expect(loadIdeas(db, 7).map((idea) => idea.title)).toEqual(['today', 'three-days']);
+    });
+
+    it('rejects a negative or fractional window', () => {
+      expect(() => loadIdeas(db, -1)).toThrow(/non-negative integer/);
+      expect(() => loadIdeas(db, 1.5)).toThrow(/non-negative integer/);
+    });
+  });
 });

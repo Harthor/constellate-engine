@@ -56,12 +56,25 @@ export async function runPipeline(options: RunOptions = {}): Promise<PipelineRes
   console.log(`[config] Hard limits: USD ${config.max_budget_usd.toFixed(4)}, ${config.max_calls} calls`);
   console.log(`[config] Concurrency: ${config.concurrency}`);
   console.log(`[config] Embedder: ${embedder.model}`);
+  console.log(
+    `[config] Corpus window: ${
+      config.corpus_window_days > 0 ? `${config.corpus_window_days} days` : 'disabled (full corpus)'
+    }`,
+  );
 
-  const allIdeas = loadIdeas(db);
+  const windowDays = config.corpus_window_days;
+  const allIdeas = loadIdeas(db, windowDays);
   const ideas = options.limit ? allIdeas.slice(0, options.limit) : allIdeas;
-  console.log(`[pipeline] ${ideas.length} ideas loaded${options.limit ? ` (limit ${options.limit})` : ''}`);
+  const windowLabel = windowDays > 0 ? `last ${windowDays} days` : 'full corpus, no window';
+  console.log(
+    `[pipeline] ${ideas.length} ideas loaded (${windowLabel})${options.limit ? ` (limit ${options.limit})` : ''}`,
+  );
   if (ideas.length < 3) {
-    throw new Error(`Need at least 3 ideas to run the pipeline. Found ${ideas.length}.`);
+    const hint =
+      windowDays > 0
+        ? ` The ${windowDays}-day window may be too narrow — scrape first, or raise CORPUS_WINDOW_DAYS.`
+        : '';
+    throw new Error(`Need at least 3 ideas to run the pipeline. Found ${ideas.length}.${hint}`);
   }
 
   const ideaMap = new Map(ideas.map((idea) => [idea.id, idea]));

@@ -30,4 +30,27 @@ describe('pipeline configuration', () => {
     expect(config.max_calls).toBe(2);
     expect(isDryRunConfig(config)).toBe(false);
   });
+
+  it('defaults the corpus window to seven days', () => {
+    expect(loadPipelineConfig({}).corpus_window_days).toBe(7);
+  });
+
+  it('reads the corpus window from the environment', () => {
+    expect(loadPipelineConfig({ CORPUS_WINDOW_DAYS: '14' }).corpus_window_days).toBe(14);
+  });
+
+  it('accepts zero to disable the window', () => {
+    expect(loadPipelineConfig({ CORPUS_WINDOW_DAYS: '0' }).corpus_window_days).toBe(0);
+  });
+
+  it('rejects a negative corpus window', () => {
+    expect(() => loadPipelineConfig({ CORPUS_WINDOW_DAYS: '-1' })).toThrow(
+      /CORPUS_WINDOW_DAYS/,
+    );
+  });
+
+  it('lets an explicit override beat the environment', () => {
+    const config = loadPipelineConfig({ CORPUS_WINDOW_DAYS: '14' }, { corpus_window_days: 3 });
+    expect(config.corpus_window_days).toBe(3);
+  });
 });

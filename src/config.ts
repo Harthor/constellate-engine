@@ -3,6 +3,7 @@ import type { PipelineConfig } from './types/index.js';
 export const DEFAULT_MODEL = 'claude-fable-5';
 
 export const DEFAULT_CONFIG: PipelineConfig = {
+  corpus_window_days: 7,
   num_clusters: 30,
   max_neighborhood_size: 30,
   min_neighborhood_size: 20,
@@ -42,6 +43,9 @@ export function loadPipelineConfig(
 ): PipelineConfig {
   const fromEnvironment: PipelineConfig = {
     ...DEFAULT_CONFIG,
+    corpus_window_days: Math.floor(
+      numberFromEnv(env, 'CORPUS_WINDOW_DAYS', DEFAULT_CONFIG.corpus_window_days, 0),
+    ),
     model: env.ANTHROPIC_MODEL?.trim() || DEFAULT_CONFIG.model,
     max_output_tokens: Math.floor(
       numberFromEnv(env, 'ANTHROPIC_MAX_OUTPUT_TOKENS', DEFAULT_CONFIG.max_output_tokens, 1),
@@ -75,6 +79,9 @@ export function loadPipelineConfig(
 
   const config = { ...fromEnvironment, ...overrides };
   if (!config.model.trim()) throw new Error('ANTHROPIC_MODEL cannot be empty.');
+  if (!Number.isInteger(config.corpus_window_days) || config.corpus_window_days < 0) {
+    throw new Error('CORPUS_WINDOW_DAYS must be a non-negative integer (0 disables the window).');
+  }
   if (!Number.isInteger(config.max_calls) || config.max_calls < 0) {
     throw new Error('ANTHROPIC_MAX_CALLS must be a non-negative integer.');
   }

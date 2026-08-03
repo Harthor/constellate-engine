@@ -60,6 +60,18 @@ export interface EmergentPattern {
 // ─── Pipeline types ─────────────────────────────────────────────────
 
 export interface PipelineConfig {
+  /**
+   * Rolling window, in days, applied to the corpus before vectorizing. The
+   * corpus table is cumulative, so without this the analysis mixes the current
+   * week with every week before it and the "what's emerging" signal decays.
+   *
+   * Filtered on ideas.created_at, which is INGESTION time, not publication
+   * time — the scrapers do not preserve the latter. A weekly cadence keeps the
+   * two roughly aligned; skipping a run drops items that are still recent.
+   *
+   * 0 disables the window and analyses the whole corpus.
+   */
+  corpus_window_days: number;
   num_clusters: number;
   max_neighborhood_size: number;
   min_neighborhood_size: number;
