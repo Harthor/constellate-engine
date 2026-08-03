@@ -11,6 +11,13 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { scrapeAll } from '../src/sources/scrapers.js';
+import {
+  evaluateSources,
+  formatSourceSummary,
+  hasHardFailure,
+  logSourceReports,
+  type SourceReport,
+} from '../src/sources/health.js';
 import { bulkInsertIdeas, closeDb } from '../src/db/database.js';
 import { runPipeline } from '../src/pipeline/index.js';
 import { isDryRunConfig, loadPipelineConfig } from '../src/config.js';
@@ -30,22 +37,24 @@ async function main() {
 
   let totalNew = 0;
   let totalFetched = 0;
+  let sourceReports: SourceReport[] = [];
   if (process.argv.includes('--skip-scrape')) {
     console.log('--- Step 1: Source refresh skipped explicitly ---\n');
   } else {
     console.log('--- Step 1: Scraping sources ---');
     const results = await scrapeAll();
-    for (const r of results) {
-      if (r.error) {
-        console.log(`  [${r.source}] ERROR: ${r.error}`);
-        continue;
-      }
-      const count = bulkInsertIdeas(r.ideas);
-      totalNew += count;
+    const outcomes = results.map((r) => {
+      if (r.error) return { source: r.source, fetched: 0, inserted: 0, error: r.error };
+      const inserted = bulkInsertIdeas(r.ideas);
+      totalNew += inserted;
       totalFetched += r.ideas.length;
-      console.log(`  [${r.source}] ${r.ideas.length} fetched, ${count} new`);
-    }
-    console.log(`  Total: ${totalFetched} fetched, ${totalNew} new\n`);
+      return { source: r.source, fetched: r.ideas.length, inserted };
+    });
+    sourceReports = evaluateSources(outcomes);
+    logSourceReports(sourceReports);
+    console.log(`  Total: ${totalFetched} fetched, ${totalNew} new`);
+    console.log(formatSourceSummary(sourceReports));
+    console.log('');
   }
 
   // Step 2: Run pipeline
@@ -89,6 +98,17 @@ async function main() {
   }
 
   closeDb();
+
+  // Exit non-zero AFTER the run completes, so a scheduled job goes red on a
+  // broken source without losing the analysis of the sources that did work.
+  if (hasHardFailure(sourceReports)) {
+    const failed = sourceReports
+      .filter((report) => report.status === 'failed')
+      .map((report) => report.source)
+      .join(', ');
+    console.error(`\nFAILED: no usable rows from ${failed}. Exiting non-zero.`);
+    process.exitCode = 1;
+  }
 }
 
 main().catch((e) => {

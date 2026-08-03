@@ -8,6 +8,12 @@ import type { PipelineConfig, PreflightReport, RawIdea } from '../src/types/inde
 import { getDb, bulkInsertIdeas, clearCache, closeDb } from '../src/db/database.js';
 import { createEmbedder } from '../src/embeddings/embedder.js';
 import { SCRAPERS, SOURCE_NAMES, scrapeAll } from '../src/sources/scrapers.js';
+import {
+  evaluateSources,
+  formatSourceSummary,
+  hasHardFailure,
+  logSourceReports,
+} from '../src/sources/health.js';
 import { validatePipelineResult } from '../src/output-schema.js';
 
 const program = new Command();
@@ -189,18 +195,21 @@ program
         : await scrapeAll();
       let totalFetched = 0;
       let totalNew = 0;
-      for (const result of results) {
+      const outcomes = results.map((result) => {
         if (result.error) {
-          console.log(`  [${result.source}] ERROR: ${result.error}`);
-          continue;
+          return { source: result.source, fetched: 0, inserted: 0, error: result.error };
         }
-        const count = bulkInsertIdeas(result.ideas);
+        const inserted = bulkInsertIdeas(result.ideas);
         totalFetched += result.ideas.length;
-        totalNew += count;
-        console.log(`  [${result.source}] ${result.ideas.length} fetched, ${count} new`);
-      }
+        totalNew += inserted;
+        return { source: result.source, fetched: result.ideas.length, inserted };
+      });
+      const reports = evaluateSources(outcomes);
+      logSourceReports(reports);
       console.log(`Total: ${totalFetched} fetched, ${totalNew} new ideas ingested.`);
+      console.log(formatSourceSummary(reports));
       closeDb();
+      if (hasHardFailure(reports)) process.exitCode = 1;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(`Error: ${message}`);
